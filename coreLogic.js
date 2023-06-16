@@ -7,6 +7,7 @@ class CoreLogic {
     // run arweave web scrapping
     console.log('********Arweave Webscrapiing started**********');
 
+    console.log("Scraping task called in round", round)
     const proof_cid = await arweave_task(round);
 
     if (proof_cid) {
@@ -24,6 +25,8 @@ class CoreLogic {
 
   async fetchSubmission(round) {
     console.log('**********IN FETCH SUBMISSION**********');
+
+    console.log('FetchSubmission called in round', round)
 
     await dataDb.intializeData();
     const proof_cid = await dataDb.getProof(round); // retrieves the cid

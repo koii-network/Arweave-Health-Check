@@ -130,42 +130,16 @@ class Gatherer {
     let path = `healthyList.json`;
 
     try {
-      const resp = await namespaceWrapper.fs('access', path);
-      if (!resp.error) {
-        console.log('healthy list file exists, appending');
-        await namespaceWrapper.fs(
-          'appendFile',
-          path,
-          JSON.stringify(data),
-          function (err) {
-            if (err) throw err;
-          },
-        );
-      } else {
-        console.log('creating healthy list file');
-        await namespaceWrapper.fs(
-          'writeFile',
-          path,
-          JSON.stringify(data),
-          err => {
-            if (err) {
-              console.error(err);
-            }
-          },
-        );
-      }
-    } catch (err) {
-      console.log('creating healthy list file');
       await namespaceWrapper.fs(
-        'writeFile',
+        'appendFile',
         path,
         JSON.stringify(data),
-        err => {
-          if (err) {
-            console.error(err);
-          }
+        function (err) {
+          if (err) throw err;
         },
       );
+    } catch (err) {
+      console.log(err);
     }
 
     if (storageClient) {
@@ -184,7 +158,8 @@ class Gatherer {
 
   addBatch = async function (limit) {
     for (let i = 0; i < limit; i++) {
-      console.log("process " + i + " of " + limit + " items")
+      let t = i+1;
+      console.log('process ' + t + ' of ' + limit + ' items');
       await this.processPending();
     }
   };

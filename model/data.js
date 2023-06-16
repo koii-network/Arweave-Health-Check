@@ -152,7 +152,6 @@ class Data {
     let healthyId = this.createHealthyId(id);
     let healthyItem = 'healthy:' + value.replace(/[\[\]"]/g, '');
     let existingData = await this.db.findOne({ healthyId });
-    console.log('existing data is ', existingData);
     if (!existingData) {
       try {
         await this.db.insert({ healthyId, healthyItem });

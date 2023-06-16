@@ -4,14 +4,6 @@ require('dotenv').config();
 const axios = require('axios');
 const Data = require(__dirname + '/../../model/data.js');
 const Adapter = require(__dirname + '/../../model/adapter.js');
-const {
-  Builder,
-  Browser,
-  By,
-  Key,
-  until,
-  Capabilities,
-} = require('selenium-webdriver');
 
 class Arweave extends Adapter {
   constructor(credentials, maxRetry, db, txId) {

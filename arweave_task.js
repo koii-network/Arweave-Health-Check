@@ -17,8 +17,6 @@ const run = async round => {
 
   let publicKeyHex = Buffer.from(keypair._keypair.publicKey).toString('hex');
 
-  console.log('publicKeyHex', publicKeyHex);
-
   let query = 'web3'; // the query our twitter search will use
 
   let options = {
@@ -31,7 +29,7 @@ const run = async round => {
     credentials,
     options.maxRetry,
     dataDb,
-    'txidhere',
+    'twIEDggMpjrO_pXnRfVqoprVtiuf_XHxw72nQvWS8bE',
   );
 
   const gatherer = new Gatherer(dataDb, adapter, options);
@@ -59,44 +57,13 @@ async function uploadIPFS(data, round) {
   let proofPath = `proofs${round}.json`;
 
   try {
-    const resp = await namespaceWrapper.fs('access', proofPath);
-    if (!resp.error) {
-      console.log('proofs file exists, appending to it now');
-      namespaceWrapper.fs(
-        'appendFile',
-        proofPath,
-        JSON.stringify(data),
-        err => {
-          if (err) {
-            console.error(err);
-          }
-        },
-      );
-    } else {
-      await namespaceWrapper.fs(
-        'writeFile',
-        proofPath,
-        JSON.stringify(data),
-        err => {
-          if (err) {
-            console.error(err);
-          }
-        },
-      );
-    }
+    namespaceWrapper.fs('appendFile', proofPath, JSON.stringify(data), err => {
+      if (err) {
+        console.error(err);
+      }
+    });
   } catch (err) {
-    console.log('proofs file does not exist, creating it now ', err);
-    // console.log('proofPATH', proofPath);
-    await namespaceWrapper.fs(
-      'writeFile',
-      proofPath,
-      JSON.stringify(data),
-      err => {
-        if (err) {
-          console.error(err);
-        }
-      },
-    );
+    console.log(err);
   }
 
   if (storageClient) {

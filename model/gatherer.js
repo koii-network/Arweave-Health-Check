@@ -24,7 +24,7 @@ const { TASK_ID } = require('../init');
 
 class Gatherer {
   constructor(db, adapter, options) {
-    console.log('creating new adapter', db.name, adapter.credentials, options);
+    console.log('creating new adapter', db.name, adapter.txId, options);
     this.db = db;
     this.maxRetry = options.maxRetry;
     this.options = options;
@@ -38,7 +38,7 @@ class Gatherer {
     this.newFound = 0;
     this.queue = []; // the list of items the task_queue will execute asynchronously
     this.task_queue = new Queue(5, 10000); // no more than 5 tasks at a time, 10000ms delay between sequential tasks
-    this.txId = 'twIEDggMpjrO_pXnRfVqoprVtiuf_XHxw72nQvWS8bE';
+    this.txId = adapter.txId;
   }
 
   gather = async limit => {
@@ -57,7 +57,7 @@ class Gatherer {
     let blue = true;
 
     while (blue) {
-      let nextPage = await this.adapter.getNextPage();
+      let nextPage = await this.adapter.getNextPage(); // Null in Arweave
       if (nextPage) {
         if (this.options.nextLimit) {
           if (nextPage.length > this.options.nextLimit) {
@@ -184,6 +184,7 @@ class Gatherer {
 
   addBatch = async function (limit) {
     for (let i = 0; i < limit; i++) {
+      console.log("process " + i + " of " + limit + " items")
       await this.processPending();
     }
   };
@@ -193,14 +194,12 @@ class Gatherer {
     if (this.pending.length > 0) {
       let item = await this.getRandomNode();
       if (typeof item !== 'string') item = JSON.stringify(item.location);
-      // console.log('item', item);
+
       const peerInstance = new Peer(item);
-      // console.log(`starting ${ item.location }, remaining ${ this.pending.length }`);
-      // this.printStatus();
 
       let result = await peerInstance.fullScan(item, this.txId);
       // remove from pending
-      let pendingId = `pending:${item}`;
+      let pendingId = `pending:arweaveNodes:${item}`;
       await this.db.deleteItem(pendingId);
       this.queried.push(item.location);
       console.log(
@@ -219,12 +218,8 @@ class Gatherer {
 
         console.log(`Healthy node found at ${item} `);
         await this.printStatus();
-
-        if (result.peers.length > 0) {
-          // console.log('has peers!')
-          await this.addNodes(result.peers);
-        }
       }
+
       await this.removeFromRunning(item); // this function should take care of removing the old pending item and adding new pending items for the list from this item
     } else {
       console.log('no more pending items');

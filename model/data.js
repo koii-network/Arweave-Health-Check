@@ -280,9 +280,9 @@ class Data {
     return proofList;
   }
 
-  async deleteItem(docToDelete) {
+  async deleteItem(pendingId) {
     // console.log('deleting item', docToDelete);
-    await this.db.remove({ docToDelete });
+    await this.db.remove({ pendingId });
   }
 
   // Tool to create a new ID

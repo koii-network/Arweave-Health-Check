@@ -214,7 +214,7 @@ class Data {
         return undefined;
       }
     } else {
-      console.log('IPFS already exists');
+      // console.log('IPFS already exists');
       return true;
     }
   }

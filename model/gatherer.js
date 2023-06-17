@@ -149,6 +149,12 @@ class Gatherer {
       const cid = await storageClient.put(file);
       console.log('Arweave healthy list to IPFS: ', cid);
 
+      try {
+        await namespaceWrapper.fs('unlink', path);
+      } catch (err) {
+        console.error(err);
+      }
+
       return cid;
     } else {
       console.log('NODE DO NOT HAVE ACCESS TO WEB3.STORAGE');
@@ -158,7 +164,7 @@ class Gatherer {
 
   addBatch = async function (limit) {
     for (let i = 0; i < limit; i++) {
-      let t = i+1;
+      let t = i + 1;
       console.log('process ' + t + ' of ' + limit + ' items');
       await this.processPending();
     }
@@ -245,24 +251,12 @@ class Gatherer {
     });
   };
 
-  addToHealthy(nodeLocation) {
-    namespaceWrapper.fs(
-      'appendFile',
-      `healthy.txt`,
-      nodeLocation + ' ',
-      function (err) {
-        if (err) throw err;
-      },
-    );
-  }
-
   updateHealthy = async function (peerLocation) {
     if (!this.healthyNodes.includes(peerLocation)) {
       this.healthyNodes.push(peerLocation);
       console.log('adding healthy node', peerLocation);
       this.db.addHealthyItem(peerLocation, peerLocation);
     }
-    this.addToHealthy(peerLocation);
   };
 
   addReplicator = async function (peerLocation) {

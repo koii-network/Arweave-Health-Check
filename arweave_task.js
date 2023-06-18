@@ -57,22 +57,50 @@ async function uploadIPFS(data, round) {
   let proofPath = `proofs${round}.json`;
 
   try {
-    namespaceWrapper.fs('appendFile', proofPath, JSON.stringify(data), err => {
-      if (err) {
-        console.error(err);
-      }
-    });
+    await namespaceWrapper.fs(
+      'writeFile',
+      proofPath,
+      JSON.stringify(data),
+      err => {
+        if (err) {
+          console.error(err);
+        }
+      },
+    );
   } catch (err) {
     console.log(err);
   }
 
   if (storageClient) {
-    const basePath = await namespaceWrapper.getBasePath();
-    let file = await getFilesFromPath(`${basePath}/${proofPath}`);
+    let proof_cid;
+    try {
+      const basePath = await namespaceWrapper.getBasePath();
+      let file = await getFilesFromPath(`${basePath}/${proofPath}`);
 
-    const proof_cid = await storageClient.put(file);
-    console.log(`Proofs of healthy list in round ${round} : `, proof_cid);
+      proof_cid = await storageClient.put(file);
+      console.log(`Proofs of healthy list in round ${round} : `, proof_cid);
+    } catch (err) {
+      console.error('Error creating proof file', err, 'trying again');
+      try {
+        await namespaceWrapper.fs(
+          'writeFile',
+          proofPath,
+          JSON.stringify(data),
+          err => {
+            if (err) {
+              console.error(err);
+            }
+          },
+        );
+        const basePath = await namespaceWrapper.getBasePath();
+        let file = await getFilesFromPath(`${basePath}/${proofPath}`);
 
+        proof_cid = await storageClient.put(file);
+        console.log(`Proofs of healthy list in round ${round} : `, proof_cid);
+      } catch (err) {
+        console.log(err);
+      }
+    }
     try {
       await namespaceWrapper.fs('unlink', proofPath);
     } catch (err) {

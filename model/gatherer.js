@@ -131,11 +131,13 @@ class Gatherer {
 
     try {
       await namespaceWrapper.fs(
-        'appendFile',
+        'writeFile',
         path,
         JSON.stringify(data),
-        function (err) {
-          if (err) throw err;
+        err => {
+          if (err) {
+            console.error(err);
+          }
         },
       );
     } catch (err) {
@@ -143,18 +145,33 @@ class Gatherer {
     }
 
     if (storageClient) {
-      const basePath = await namespaceWrapper.getBasePath();
-      let file = await getFilesFromPath(`${basePath}/${path}`);
-
-      const cid = await storageClient.put(file);
-      console.log('Arweave healthy list to IPFS: ', cid);
-
+      let cid;
       try {
-        await namespaceWrapper.fs('unlink', path);
+        const basePath = await namespaceWrapper.getBasePath();
+        let file = await getFilesFromPath(`${basePath}/${path}`);
+        cid = await storageClient.put(file);
+        console.log('Arweave healthy list to IPFS: ', cid);
       } catch (err) {
-        console.error(err);
+        console.log('error uploading to IPFS', err, 'Trying again');
+        try {
+          await namespaceWrapper.fs(
+            'writeFile',
+            path,
+            JSON.stringify(data),
+            err => {
+              if (err) {
+                console.error(err);
+              }
+            },
+          );
+          const basePath = await namespaceWrapper.getBasePath();
+          let file = await getFilesFromPath(`${basePath}/${path}`);
+          cid = await storageClient.put(file);
+          console.log('Arweave healthy list to IPFS: ', cid);
+        } catch (err) {
+          console.log(err);
+        }
       }
-
       return cid;
     } else {
       console.log('NODE DO NOT HAVE ACCESS TO WEB3.STORAGE');

@@ -1,7 +1,7 @@
 const axios = require("axios");
 const { Web3Storage, getFilesFromPath } = require("web3.storage");
 const storageClient = new Web3Storage({
-  token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGY0ODYxMzAzOTdDNTY1QzlDYTRCOTUzZTA2RWQ4NUI4MGRBQzRkYTIiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2NjYzNjU1OTk5MDMsIm5hbWUiOiJTb21hIn0.TU-KUFS9vjI9blN5dx6VsLLuIjJnpjPrxDHBvjXQUxw",
+  token: process.env.SECRET_WEB3_STORAGE_KEY,
 });
 
 module.exports = async (cid) => {
@@ -19,10 +19,17 @@ module.exports = async (cid) => {
       const file = await res.files();
       //console.log("FILE", file);
       //console.log("CID", file[0].cid);
+      let headers = {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ",
+        },
+      };
+     
       const url = `https://${file[0].cid}.ipfs.w3s.link/?filename=${file[0].name}`;
       console.log("URL", url);
       try {
-        const output = await axios.get(url);
+        const output = await axios.get(url, headers);
         return output;
       } catch (error) {
         console.log("ERROR", error);

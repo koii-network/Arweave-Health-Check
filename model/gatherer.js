@@ -9,10 +9,7 @@
 
 // The gatherer must be instantiated with options.query which can be a list of keywords or a more custom filter object for the specific adapter in use
 
-const Adapter = require('./adapter');
-const Data = require('./data');
-const Search = require('./search');
-const Twitter = require('../adapters/twitter');
+require('dotenv').config();
 const Peer = require('../adapters/arweave/peer');
 const { Web3Storage, getFilesFromPath } = require('web3.storage');
 const storageClient = new Web3Storage({
@@ -20,7 +17,7 @@ const storageClient = new Web3Storage({
 });
 const { Queue } = require('async-await-queue');
 const { namespaceWrapper } = require('../namespaceWrapper');
-const { TASK_ID } = require('../init');
+
 
 class Gatherer {
   constructor(db, adapter, options) {

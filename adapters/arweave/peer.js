@@ -6,6 +6,13 @@ class Peer {
     this.isHealthy = false;
     this.containsTx = false;
     this.peers = [];
+    this.headers = {
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537',
+      },
+      timeout: 10000,
+    };
   }
   healthCheck = async function (url) {
     // console.log('entered healthcheck')
@@ -15,9 +22,7 @@ class Peer {
     }
     try {
       console.log('sending health check ', url.href);
-      const response = await axios.get(url, {
-        timeout: 10000,
-      });
+      const response = await axios.get(url, this.headers);
       // console.log('payload received', response.data);
 
       if (response.data && response.data !== 'unknown') {
@@ -27,7 +32,7 @@ class Peer {
 
       // console.log('healthcheck completed')
     } catch (err) {
-      console.log("can't fetch " + url.href + " " + err);
+      console.log("can't fetch " + url.href + ' ' + err);
     }
     return;
   };
@@ -71,17 +76,15 @@ class Peer {
     if (this.isHealthy) {
       try {
         let txurl = new URL(`http://${peer}/tx/${txid}`);
-        console.log('sending txid check for ', txurl.href)
-        const response = await axios.get(txurl.href, {
-          timeout: 10000,
-        });
+        console.log('sending txid check for ', txurl.href);
+        const response = await axios.get(txurl.href, this.headers);
         // console.log('payload returned from ' + peerUrl, payload)
         // console.log(response.status)
         if (response.status == 200) {
           this.containsTx = true;
         }
       } catch (err) {
-         console.log ("can't fetch " + this.location + " " + err)
+        console.log("can't fetch " + this.location + ' ' + err);
       }
     }
     return this;
@@ -97,9 +100,7 @@ class Peer {
       // console.log('passed healthcheck in getPeers')
       try {
         // console.log('sending PEER check for ', this.location)
-        const response = await axios.get(url, {
-          timeout: 10000,
-        });
+        const response = await axios.get(url, this.headers);
         // console.log('payload returned from ' + this.location, payload)
         const body = response.data;
         // console.log("BODY", body)
@@ -108,7 +109,7 @@ class Peer {
         }
         return;
       } catch (err) {
-        console.log("can't fetch peers from " + this.location + " " + err);
+        console.log("can't fetch peers from " + this.location + ' ' + err);
       }
     }
     return;

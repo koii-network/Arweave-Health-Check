@@ -39,7 +39,18 @@ async function verifyPeers(proofs) {
   for (let i = 0; i < healthyList.length; i++) {
     let peer = healthyList[i];
     let url = `http://${peer}`;
-    let response = await axios.get(url);
+    let headers = {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537',
+      }
+    };
+    let response;
+    try {
+    response = await axios.get(url, headers);
+    } catch (err) {
+      console.log('Error getting peer data', err);
+      return false;
+    }
     let peerData = response.data;
     if (peerData) {
       return true;

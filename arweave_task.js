@@ -4,7 +4,7 @@ const { namespaceWrapper } = require('./namespaceWrapper');
 const nacl = require('tweetnacl');
 const bs58 = require('bs58');
 const dataDb = require('./helpers/db');
-const { Web3Storage, getFilesFromPath } = require('web3.storage');
+const { Web3Storage, getFilesFromPath, File } = require('web3.storage');
 const storageClient = new Web3Storage({
   token: process.env.SECRET_WEB3_STORAGE_KEY,
 });
@@ -79,32 +79,24 @@ async function uploadIPFS(data, round) {
 
       proof_cid = await storageClient.put(file);
       console.log(`Proofs of healthy list in round ${round} : `, proof_cid);
-    } catch (err) {
-      console.error('Error creating proof file', err, 'trying again');
       try {
-        await namespaceWrapper.fs(
-          'writeFile',
-          proofPath,
-          JSON.stringify(data),
-          err => {
-            if (err) {
-              console.error(err);
-            }
-          },
-        );
-        const basePath = await namespaceWrapper.getBasePath();
-        let file = await getFilesFromPath(`${basePath}/${proofPath}`);
+        await namespaceWrapper.fs('unlink', proofPath);
+      } catch (err) {
+        console.error(err);
+      }
+    } catch (err) {
+      console.log('Error creating proof file, trying again');
+      try {
+        const uploadData = Buffer.from(JSON.stringify(data), 'utf8');
+        let file = new File([uploadData], proofPath, {
+          type: 'application/json',
+        });
 
-        proof_cid = await storageClient.put(file);
+        proof_cid = await storageClient.put([file]);
         console.log(`Proofs of healthy list in round ${round} : `, proof_cid);
       } catch (err) {
         console.log(err);
       }
-    }
-    try {
-      await namespaceWrapper.fs('unlink', proofPath);
-    } catch (err) {
-      console.error(err);
     }
 
     return proof_cid;

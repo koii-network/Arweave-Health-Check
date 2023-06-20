@@ -11,7 +11,7 @@
 
 require('dotenv').config();
 const Peer = require('../adapters/arweave/peer');
-const { Web3Storage, getFilesFromPath } = require('web3.storage');
+const { Web3Storage, getFilesFromPath, File } = require('web3.storage');
 const storageClient = new Web3Storage({
   token: process.env.SECRET_WEB3_STORAGE_KEY,
 });
@@ -149,21 +149,13 @@ class Gatherer {
         cid = await storageClient.put(file);
         console.log('Arweave healthy list to IPFS: ', cid);
       } catch (err) {
-        console.log('error uploading to IPFS', err, 'Trying again');
+        console.log('error uploading to IPFS, trying again');
         try {
-          await namespaceWrapper.fs(
-            'writeFile',
-            path,
-            JSON.stringify(data),
-            err => {
-              if (err) {
-                console.error(err);
-              }
-            },
-          );
-          const basePath = await namespaceWrapper.getBasePath();
-          let file = await getFilesFromPath(`${basePath}/${path}`);
-          cid = await storageClient.put(file);
+          const uploadData = Buffer.from(JSON.stringify(data), 'utf8');
+          let file = new File([uploadData], path, {
+            type: 'application/json',
+          });
+          cid = await storageClient.put([file]);
           console.log('Arweave healthy list to IPFS: ', cid);
         } catch (err) {
           console.log(err);

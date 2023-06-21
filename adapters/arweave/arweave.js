@@ -61,7 +61,7 @@ class Arweave extends Adapter {
       }
       return;
     } catch (err) {
-      console.log("can't fetch peers from " + this.location + " " + err);
+      console.log("can't fetch peers from " + this.location + ' ' + err);
     }
     return peers;
   };
@@ -102,12 +102,8 @@ class Arweave extends Adapter {
 
   storeListAsPendingItems(list) {
     // console.log('db', this.db)
-    // TODO - store the list of nodes as pending items using db
     for (let node of list) {
-      // the main difference with this adapter is that the node's IP address is the data for each item, so the ID === VALUE
-      //if (!this.db.isPendingItem(node) && !this.db.isDataItem(node)) {
-      this.db.addPendingItem(node, node);
-      //}
+        this.db.addPendingItem(node, node);
     }
     return true;
   }
@@ -118,7 +114,8 @@ class Arweave extends Adapter {
       let newNodes = [];
       let headers = {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537',
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537',
         },
       };
       let response = await axios.get('https://arweave.net/peers', headers);

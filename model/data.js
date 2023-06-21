@@ -65,15 +65,21 @@ class Data {
 
   // create pending item
   async addPendingItem(id, value) {
-    let pendingId = this.createPendingId(id.replace(/[\[\]"]/g, ''));
-    let pendingItem = 'pending:' + value.replace(/[\[\]"]/g, '');
     try {
+      let pendingId = this.createPendingId(id.replace(/[\[\]"]/g, ''));
+      let pendingItem = 'pending:' + value.replace(/[\[\]"]/g, '');
+      let existingData = await this.db.findOne({ pendingId });
       // console.log({ pendingId, pendingItem });
+      if (!existingData) {
       await this.db.insert({ pendingId, pendingItem });
       // console.log('added pending item', id);
       return true;
+      } else {
+        console.log('pending item already exists or is verified');
+        return true;
+      }
     } catch (err) {
-      // console.error('Error in addPendingItem', err.errorType);
+      console.log('Error in addPendingItem', err);
       return undefined;
     }
   }

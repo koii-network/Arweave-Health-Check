@@ -11,7 +11,7 @@ class Peer {
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537',
       },
-      timeout: 10000,
+      timeout: 3000,
     };
   }
   healthCheck = async function (url) {
@@ -49,9 +49,6 @@ class Peer {
 
     // console.log('moved past')
     if (this.isHealthy) {
-      // console.log('getting peers for ' + this.location)
-      await this.getPeers(url);
-
       // console.log('checking tx for ' + this.location)
       await this.checkTx(peer, txid);
     }
@@ -90,30 +87,6 @@ class Peer {
     return this;
   };
 
-  // getPeers
-  // Checks peers endpoint
-  getPeers = async function (url) {
-    if (!this.isHealthy) await this.healthCheck();
-
-    // console.log('trying to get peers')
-    if (this.isHealthy) {
-      // console.log('passed healthcheck in getPeers')
-      try {
-        // console.log('sending PEER check for ', this.location)
-        const response = await axios.get(url, this.headers);
-        // console.log('payload returned from ' + this.location, payload)
-        const body = response.data;
-        // console.log("BODY", body)
-        if (body) {
-          this.peers = body;
-        }
-        return;
-      } catch (err) {
-        console.log("can't fetch peers from " + this.location + ' ' + err);
-      }
-    }
-    return;
-  };
 }
 
 module.exports = Peer;

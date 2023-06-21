@@ -32,13 +32,13 @@ const run = async () => {
     credentials,
     options.maxRetry,
     dataDb,
-    'txidhere',
+    'twIEDggMpjrO_pXnRfVqoprVtiuf_XHxw72nQvWS8bE',
   );
 
   const gatherer = new Gatherer(dataDb, adapter, options);
 
   // run a gatherer to get 100 items
-  let result = await gatherer.gather(100);
+  let result = await gatherer.gather();
 
   return result;
 

@@ -18,7 +18,6 @@ const storageClient = new Web3Storage({
 const { Queue } = require('async-await-queue');
 const { namespaceWrapper } = require('../namespaceWrapper');
 
-
 class Gatherer {
   constructor(db, adapter, options) {
     console.log('creating new adapter', db.name, adapter.txId, options);
@@ -34,13 +33,11 @@ class Gatherer {
     this.replicators = [];
     this.newFound = 0;
     this.queue = []; // the list of items the task_queue will execute asynchronously
-    this.task_queue = new Queue(5, 10000); // no more than 5 tasks at a time, 10000ms delay between sequential tasks
+    this.task_queue = new Queue(20, 5000); // no more than 20 tasks at a time, 5000ms delay between sequential tasks
     this.txId = adapter.txId;
   }
 
   gather = async limit => {
-    console.log('limit received', limit);
-
     // I. Startup
     // 1. Fetch an initial list of items using the query provided
     let startupList = await this.adapter.newSearch(this.options.query);
@@ -78,23 +75,28 @@ class Gatherer {
     // 6. Fetch the next page of items using the query provided
     // 7. Repeat steps 4-6 until the limit is reached or there are no more pages to fetch
 
-    let red = true;
-    this.pending = await this.db.getPendingList(this.options.limit);
+    let red = await this.db.getPendingList(this.options.limit).then(res => {
+      res = true;
+      return res;
+    });
     while (red) {
       try {
+        this.pending = await this.db.getPendingList(this.options.limit);
+        console.log('pending', this.pending.length);
         if (this.pending.length > 0) {
-          // console.log('adding batch', this.pending.length);
-          this.queue.push(
-            this.task_queue.run(() =>
-              this.addBatch(limit).catch(e => console.error(e)),
-            ),
-          );
+          for (const peer of this.pending) {
+            this.queue.push(
+              this.task_queue
+                .run(() => this.addBatch(peer))
+                .catch(e => console.error(e)),
+            );
+          }
 
-          await Promise.allSettled(this.queue); // TODO fix batching as this will only resolve once all queued items have run, while we want to refill the batch as it is emptied
+          await Promise.allSettled(this.queue);
         } else {
           console.log('queue empty');
-          // this.printStatus();
-          break;
+          this.printStatus();
+          red = false;
         }
       } catch (err) {
         console.error('error processing a node', err);
@@ -168,10 +170,9 @@ class Gatherer {
     return cid;
   };
 
-  addBatch = async function (limit) {
-    for (let i = 0; i < limit; i++) {
-      let t = i + 1;
-      console.log('process ' + t + ' of ' + limit + ' items');
+  addBatch = async function () {
+    for (let i = 0; i < this.pending.length; i++) {
+      console.log(this.pending.length + ' left in batch');
       await this.processPending();
     }
   };
@@ -188,16 +189,26 @@ class Gatherer {
       // remove from pending
       let pendingId = `pending:arweaveNodes:${item}`;
       await this.db.deleteItem(pendingId);
-      this.queried.push(item.location);
+      this.queried.push(item);
       console.log(
+        item,
         'healthy? ',
         result.isHealthy,
         'contains tx? ',
         result.containsTx,
       );
       if (result.isHealthy) {
-        console.log('received ', result.peers.length, ' peers');
-        await this.adapter.storeListAsPendingItems(result.peers);
+        for (let newPeer of result.peers) {
+          if (typeof newPeer !== 'string') {
+            await this.adapter.storeListAsPendingItems(newPeer);
+            await this.addNodes(newPeer);
+          } else {
+            // console.log('received ', result.peers.length, ' peers');
+            await this.adapter.storeListAsPendingItems(result.peers);
+            await this.addNodes(result.peers);
+            break;
+          }
+        }
       }
 
       if (result.containsTx) {
@@ -251,7 +262,7 @@ class Gatherer {
         !this.pending.includes(peerUrl) &&
         !this.running.includes(peerUrl)
       ) {
-        this.pending.push(new Peer(peerUrl));
+        this.pending.push(peerUrl);
         this.newFound = this.newFound + 1;
       }
     });

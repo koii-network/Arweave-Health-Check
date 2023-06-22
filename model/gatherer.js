@@ -75,13 +75,18 @@ class Gatherer {
     // 6. Fetch the next page of items using the query provided
     // 7. Repeat steps 4-6 until the limit is reached or there are no more pages to fetch
 
-    let red = await this.db.getPendingList(this.options.limit).then(res => {
-      res = true;
-      return res;
+    await this.db.getPendingList().then(async pendingList => {
+      if (pendingList) {
+        console.log('start up pending list', pendingList);
+        await this.addNodes(pendingList);
+      } else {
+        console.log('no pending list found');
+      }
     });
+
+    let red = true;
     while (red) {
       try {
-        this.pending = await this.db.getPendingList(this.options.limit);
         console.log('pending', this.pending.length);
         if (this.pending.length > 0) {
           for (const peer of this.pending) {
@@ -173,7 +178,8 @@ class Gatherer {
   addBatch = async function () {
     for (let i = 0; i < this.pending.length; i++) {
       console.log(this.pending.length + ' left in batch');
-      await this.processPending();
+      let item = await this.processPending();
+      return item;
     }
   };
 
@@ -219,6 +225,7 @@ class Gatherer {
       }
 
       await this.removeFromRunning(item); // this function should take care of removing the old pending item and adding new pending items for the list from this item
+      return item;
     } else {
       console.log('no more pending items');
       this.printStatus();

@@ -21,7 +21,7 @@ class Peer {
       return;
     }
     try {
-      console.log('sending health check ', url.href);
+      // console.log('sending health check ', url.href);
       const response = await axios.get(url, this.headers);
       // console.log('payload received', response.data);
 

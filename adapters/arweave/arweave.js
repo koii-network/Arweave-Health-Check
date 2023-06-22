@@ -100,10 +100,10 @@ class Arweave extends Adapter {
     return this.db.getPendingItems();
   }
 
-  storeListAsPendingItems(list) {
+  async storeListAsPendingItems(list) {
     // console.log('db', this.db)
     for (let node of list) {
-        this.db.addPendingItem(node, node);
+        await this.db.addPendingItem(node, node);
     }
     return true;
   }

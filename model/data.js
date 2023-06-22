@@ -68,6 +68,13 @@ class Data {
     try {
       let pendingId = this.createPendingId(id.replace(/[\[\]"]/g, ''));
       let pendingItem = 'pending:' + value.replace(/[\[\]"]/g, '');
+      
+      // * This function is used to check if the pending item has already been added to the database 
+      // let deletedItems = `deleted:${pendingId}`;
+      // if( await this.db.findOne({ deletedItems })) {
+      //   return true
+      // }
+
       let existingData = await this.db.findOne({ pendingId });
       // console.log({ pendingId, pendingItem });
       if (!existingData) {
@@ -75,7 +82,7 @@ class Data {
       // console.log('added pending item', id);
       return true;
       } else {
-        console.log('pending item already exists or is verified');
+        // console.log('pending item already exists or is verified');
         return true;
       }
     } catch (err) {
@@ -288,7 +295,24 @@ class Data {
   async deleteItem(pendingId) {
     // console.log('deleting item', docToDelete);
     await this.db.remove({ pendingId });
+    // await this.deletedItems(pendingId);
   }
+
+  // * This function is used to check if the pending item has already been added to the database
+  // async deletedItems(pendingId) {
+  //   let deletedItems = `deleted:${pendingId}`;
+  //   let existingData = await this.db.findOne({ deletedItems });
+  //   if (!existingData) {
+  //     try {
+  //       await this.db.insert({ deletedItems });
+  //       return true;
+  //     } catch (err) {
+  //       return undefined;
+  //     }
+  //   } else {
+  //     return true;
+  //   }
+  // }
 
   // Tool to create a new ID
   createId(id) {

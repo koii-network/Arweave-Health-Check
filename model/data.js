@@ -293,9 +293,12 @@ class Data {
   }
 
   async deleteItem(pendingId) {
-    // console.log('deleting item', docToDelete);
     await this.db.remove({ pendingId });
-    // await this.deletedItems(pendingId);
+  }
+
+  async deleteHealthy(node) {
+    let healthyId = this.createHealthyId(node);
+    await this.db.remove({ healthyId });
   }
 
   // * This function is used to check if the pending item has already been added to the database

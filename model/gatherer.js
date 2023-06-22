@@ -33,7 +33,7 @@ class Gatherer {
     this.replicators = [];
     this.newFound = 0;
     this.queue = []; // the list of items the task_queue will execute asynchronously
-    this.task_queue = new Queue(20, 5000); // no more than 20 tasks at a time, 5000ms delay between sequential tasks
+    this.task_queue = new Queue(200, 100); // no more than 100 tasks at a time, 100ms delay between sequential tasks
     this.txId = adapter.txId;
   }
 
@@ -92,7 +92,7 @@ class Gatherer {
           for (const peer of this.pending) {
             this.queue.push(
               this.task_queue
-                .run(() => this.addBatch(peer))
+                .run(() => this.addBatch())
                 .catch(e => console.error(e)),
             );
           }
@@ -107,14 +107,28 @@ class Gatherer {
         console.error('error processing a node', err);
         break;
       }
-      red = false;
     }
 
     // III. Diagnostics
     // 8. Return live asynchronous updates of the items being saved to the database
-    let healthyNodes = await this.db.getHealthyList();
+    let oldHealthyNodes = await this.db.getHealthyList();
+    let healthyNodes = [];
+
+    // double check the healthy nodes are still healthy
+    for (let node of oldHealthyNodes) {
+      const peerInstance = new Peer(node);
+      let result = await peerInstance.fullScan(node, this.txId);
+      if (!result.isHealthy) {
+        console.log('removing unhealthy node', node);
+        await this.db.deleteItem(node);
+      } else {
+        healthyNodes.push(node);
+      }
+    }
+
     if (healthyNodes) {
       console.log('healthy nodes', healthyNodes);
+
       const cid = await this.uploadIPFS(healthyNodes);
       // IV. Auditing and Proofs
       // 9. Incrementally upload new items to IPFS and save the IPFS hash to the database (i.e. db.put('ipfs:' + item.id + ':data, ipfsHash)) for use in the rest apis
@@ -124,7 +138,6 @@ class Gatherer {
       });
 
       return cid;
-      // TODO 11. Sign all IPFS payloads and save the signature to the database (i.e. db.put('ipfs:' + item.id + ':signature', ipfsHash)) for use in the rest apis
     } else {
       console.log('no healthy nodes found');
     }
@@ -177,9 +190,9 @@ class Gatherer {
 
   addBatch = async function () {
     for (let i = 0; i < this.pending.length; i++) {
-      console.log(this.pending.length + ' left in batch');
-      let item = await this.processPending();
-      return item;
+      console.log(this.pending.length + ' left in pending list');
+      await this.processPending();
+      return true;
     }
   };
 

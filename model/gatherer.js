@@ -190,9 +190,8 @@ class Gatherer {
 
   addBatch = async function () {
     for (let i = 0; i < this.pending.length; i++) {
-      console.log(this.pending.length + ' left in pending list');
-      await this.processPending();
-      return true;
+      // console.log(this.pending.length + ' left in pending list');
+      return await this.processPending();
     }
   };
 
@@ -209,13 +208,14 @@ class Gatherer {
       let pendingId = `pending:arweaveNodes:${item}`;
       await this.db.deleteItem(pendingId);
       this.queried.push(item);
-      console.log(
-        item,
-        'healthy? ',
-        result.isHealthy,
-        'contains tx? ',
-        result.containsTx,
-      );
+      // console.log(
+      //   item,
+      //   'healthy? ',
+      //   result.isHealthy,
+      //   'contains tx? ',
+      //   result.containsTx,
+      // );
+      this.printStatus();
       if (result.isHealthy) {
         for (let newPeer of result.peers) {
           if (typeof newPeer !== 'string') {
@@ -233,7 +233,7 @@ class Gatherer {
       if (result.containsTx) {
         await this.updateHealthy(item);
 
-        console.log(`Healthy node found at ${item} `);
+        // console.log(`Healthy node found at ${item} `);
         await this.printStatus();
       }
 
@@ -304,15 +304,17 @@ class Gatherer {
   };
 
   printStatus = async function () {
+    console.clear();
+    console.log('=============================');
     console.log(`\r\nResults: \r\n
                 Healthy: ${this.healthyNodes.length} \r\n
                 Queried: ${this.queried.length} \r\n
-                Replications: ${this.replicators.length}\r\n
                 Pending: ${this.pending.length}\r\n
                 New Nodes Found: ${this.newFound}\r\n
                 Running: ${this.running.length}\r\n
                 In Queue: ${this.queue.length} 
             `);
+    console.log('=============================');
   };
 
   // TODO - fix the methods below with proper db prefix mgmt

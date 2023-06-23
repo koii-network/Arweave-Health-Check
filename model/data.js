@@ -68,12 +68,6 @@ class Data {
     try {
       let pendingId = this.createPendingId(id.replace(/[\[\]"]/g, ''));
       let pendingItem = 'pending:' + value.replace(/[\[\]"]/g, '');
-      
-      // * This function is used to check if the pending item has already been added to the database 
-      // let deletedItems = `deleted:${pendingId}`;
-      // if( await this.db.findOne({ deletedItems })) {
-      //   return true
-      // }
 
       let existingData = await this.db.findOne({ pendingId });
       // console.log({ pendingId, pendingItem });
@@ -168,7 +162,7 @@ class Data {
     if (!existingData) {
       try {
         await this.db.insert({ healthyId, healthyItem });
-        console.log('added healthy item', { healthyId, healthyItem });
+        // console.log('added healthy item', { healthyId, healthyItem });
         return true;
       } catch (err) {
         console.error(
@@ -179,7 +173,7 @@ class Data {
         return undefined;
       }
     } else {
-      console.log('healthy item already exists');
+      // console.log('healthy item already exists');
       return true;
     }
   }
@@ -294,11 +288,13 @@ class Data {
 
   async deleteItem(pendingId) {
     await this.db.remove({ pendingId });
+    this.db.compactDatafile();
   }
 
   async deleteHealthy(node) {
     let healthyId = this.createHealthyId(node);
     await this.db.remove({ healthyId });
+    this.db.compactDatafile();
   }
 
   // * This function is used to check if the pending item has already been added to the database
@@ -350,7 +346,7 @@ class Data {
     let normalId = this.createId(id);
     // console.log('normal ID is ' + normalId);
     let healthyId = `healthy:${normalId}`;
-    console.log('new healthy ID: ', healthyId);
+    // console.log('new healthy ID: ', healthyId);
     return healthyId;
   }
 }

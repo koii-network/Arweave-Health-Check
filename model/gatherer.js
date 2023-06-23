@@ -35,6 +35,7 @@ class Gatherer {
     this.queue = []; // the list of items the task_queue will execute asynchronously
     this.task_queue = new Queue(200, 100); // no more than 100 tasks at a time, 100ms delay between sequential tasks
     this.txId = adapter.txId;
+    this.print = null;
   }
 
   gather = async limit => {
@@ -85,6 +86,7 @@ class Gatherer {
     });
 
     let red = true;
+    this.startPrinting();
     while (red) {
       try {
         console.log('pending', this.pending.length);
@@ -128,8 +130,13 @@ class Gatherer {
 
     if (healthyNodes) {
       console.log('healthy nodes', healthyNodes);
-
-      const cid = await this.uploadIPFS(healthyNodes);
+      let totalNodes = this.newFound;
+      console.log('Total nodes', totalNodes);
+      let data = {
+        healthyNodes: healthyNodes,
+        totalNodes: totalNodes,
+      };
+      const cid = await this.uploadIPFS(data);
       // IV. Auditing and Proofs
       // 9. Incrementally upload new items to IPFS and save the IPFS hash to the database (i.e. db.put('ipfs:' + item.id + ':data, ipfsHash)) for use in the rest apis
       healthyNodes.forEach(async peer => {
@@ -215,7 +222,7 @@ class Gatherer {
       //   'contains tx? ',
       //   result.containsTx,
       // );
-      this.printStatus();
+      // this.printStatus();
       if (result.isHealthy) {
         for (let newPeer of result.peers) {
           if (typeof newPeer !== 'string') {
@@ -304,7 +311,6 @@ class Gatherer {
   };
 
   printStatus = async function () {
-    console.clear();
     console.log('=============================');
     console.log(`\r\nResults: \r\n
                 Healthy: ${this.healthyNodes.length} \r\n
@@ -317,8 +323,32 @@ class Gatherer {
     console.log('=============================');
   };
 
-  // TODO - fix the methods below with proper db prefix mgmt
-  // TODO then integrate them into the above flows to allow async queueing of reads from APIs and writes to the db
+  printLoading = async function () {
+    if (this.newFound === 0) {
+      console.log('Loading status: 0%'); // to avoid division by zero
+    } else if (this.pending.length === 0) {
+      console.log('Loading status: 100%');
+      console.log(
+        'No more pending items, double check the healthy nodes are still healthy',
+      );
+      this.stopPrinting();
+    } else {
+      let status =
+        ((this.newFound - this.pending.length) / this.newFound) * 100;
+      console.log(`Loading status: ${status.toFixed(2)}%...`);
+    }
+  };
+
+  startPrinting() {
+    this.print = setInterval(() => {
+      this.printLoading();
+    }, 30000);
+  }
+
+  stopPrinting() {
+    clearInterval(this.print);
+  }
+
   getData(id) {
     return this.db.get(id);
   }

@@ -80,7 +80,7 @@ class Data {
         return true;
       }
     } catch (err) {
-      console.log('Error in addPendingItem', err);
+      // console.log('Error in addPendingItem', err);
       return undefined;
     }
   }

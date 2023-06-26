@@ -5,6 +5,7 @@ const { default: axios } = require('axios');
 
 module.exports = async (submission_value, round) => {
   console.log('******/ Areawve Scrapping VALIDATION Task FUNCTION /******');
+  try {
   const outputraw = await dataFromCid(submission_value);
   const output = outputraw.data;
   console.log('OUTPUT', output);
@@ -23,6 +24,10 @@ module.exports = async (submission_value, round) => {
 
   if (isNode == true && isPeer == true) return true; // if both are true, return true
   else return false; // if one of them is false, return false
+  } catch (err) {
+    console.log('ERROR IN ARWEAVE VALIDATION FUNCTION', err);
+    return false;
+  }
 };
 
 // verify the linktree signature by querying the other node to get it's copy of the linktree
@@ -67,6 +72,7 @@ async function verifyNode(proofs, signature, publicKey) {
     return false;
   }
 
+  try {
   const messageUint8Array = new Uint8Array(Buffer.from(proofs));
   const signatureUint8Array = bs58.decode(signature);
   const publicKeyUint8Array = new Uint8Array(Buffer.from(publicKey, 'hex'));
@@ -79,6 +85,10 @@ async function verifyNode(proofs, signature, publicKey) {
   );
 
   return isSignatureValid;
+  } catch (err) {
+    console.log('Error in verifyNode function', err);
+    return false;
+  }
 }
 
 async function verifySignature(message, signature, publicKey) {

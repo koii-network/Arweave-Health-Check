@@ -19,7 +19,7 @@ const { Queue } = require('async-await-queue');
 const { namespaceWrapper } = require('../namespaceWrapper');
 
 class Gatherer {
-  constructor(db, adapter, options) {
+  constructor(db, adapter, options, round) {
     console.log('creating new adapter', db.name, adapter.txId, options);
     this.db = db;
     this.maxRetry = options.maxRetry;
@@ -36,6 +36,7 @@ class Gatherer {
     this.task_queue = new Queue(200, 100); // no more than 100 tasks at a time, 100ms delay between sequential tasks
     this.txId = adapter.txId;
     this.print = null;
+    this.round = round;
   }
 
   gather = async limit => {
@@ -102,7 +103,6 @@ class Gatherer {
           await Promise.allSettled(this.queue);
         } else {
           console.log('queue empty');
-          this.printStatus();
           red = false;
         }
       } catch (err) {
@@ -241,14 +241,14 @@ class Gatherer {
         await this.updateHealthy(item);
 
         // console.log(`Healthy node found at ${item} `);
-        await this.printStatus();
+        // await this.printStatus();
       }
 
       await this.removeFromRunning(item); // this function should take care of removing the old pending item and adding new pending items for the list from this item
       return item;
     } else {
       console.log('no more pending items');
-      this.printStatus();
+      // this.printStatus();
       return;
     }
   };
@@ -331,11 +331,12 @@ class Gatherer {
       console.log(
         'No more pending items, double check the healthy nodes are still healthy',
       );
+      this.printStatus();
       this.stopPrinting();
     } else {
       let status =
         ((this.newFound - this.pending.length) / this.newFound) * 100;
-      console.log(`Loading status: ${status.toFixed(2)}%...`);
+      console.log(`Round ${this.round} Loading status: ${status.toFixed(2)}%...`);
     }
   };
 

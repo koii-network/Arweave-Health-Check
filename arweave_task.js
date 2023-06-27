@@ -32,7 +32,7 @@ const run = async round => {
     'twIEDggMpjrO_pXnRfVqoprVtiuf_XHxw72nQvWS8bE',
   );
 
-  const gatherer = new Gatherer(dataDb, adapter, options);
+  const gatherer = new Gatherer(dataDb, adapter, options, round);
 
   // run a gatherer to get 10 items
   let result = await gatherer.gather(10);

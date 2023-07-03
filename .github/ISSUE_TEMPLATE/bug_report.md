@@ -1,19 +1,23 @@
 ---
 name: Task Bug report
 about: Create a report to help us improve
-Desktop Node Version: ''
-Task Name: ''
-Task ID: ''
+Label: bug
 ---
 
+## 🌐 Environment
+Please provide information about your environment:
+- Operation system: _Windows/MacOS/Linux etc._
+- Desktop node version: _You can find it under "Settings"_
+- Task name and Task ID:
+
 ## 🐛 What issue are you experiencing?
-Please provide a clear and concise description of the bug you've encountered.
+_Please provide a clear and concise description of the bug you've encountered._
 
 ## 📁 Provide Log File or Screenshot
-Please provide any relevant logs or screenshots. If possible, include screenshots of the error code to help describe your problem, or the tail end of the log file.
+_Please provide any relevant logs or screenshots. If possible, include screenshots of the error code to help describe your problem, or the tail end of the log file._
 
 ## 🤔 Stake and Reward
-Did your stake get slashed? Did you receive any reward? Please provide details.
+_Did your stake get slashed? Did you receive any reward? Please provide details._
 
 ## 💻 Steps to Reproduce
 Please follow these steps to reproduce the behavior:
@@ -23,8 +27,5 @@ Please follow these steps to reproduce the behavior:
 3. Stake and run the task again.
 4. If the error persists, please scroll down to the end of the logs and provide a screenshot, if applicable.
 
-## 🌐 Environment
-Please provide information about your environment: OS, Desktop Node Version, etc.
-
 ## 📝 Additional Context
-Please provide any additional context about the problem here.
+_Please provide any additional context about the problem here._

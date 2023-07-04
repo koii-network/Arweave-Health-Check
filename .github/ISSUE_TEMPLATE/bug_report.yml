@@ -35,12 +35,9 @@ body:
       label: 🚦Task Status
       description: What is the current status of the task?
       options:
-        - label: Pending
-          value: pending
-        - label: Error
-          value: error
-        - label: Stop
-          value: stop
+        - Pending
+        - Error
+        - Stop
     validations:
       required: true
   - type: input

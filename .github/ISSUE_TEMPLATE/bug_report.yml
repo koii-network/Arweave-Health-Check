@@ -29,7 +29,7 @@ body:
       placeholder: ex. Win10/Mac M1/Ubuntu
     validations:
       required: true
-  - type: select
+  - type: dropdown
     id: task-status
     attributes:
       label: 🚦Task Status

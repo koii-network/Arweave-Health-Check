@@ -115,12 +115,25 @@ class Gatherer {
     // 8. Return live asynchronous updates of the items being saved to the database
     let oldHealthyNodes = await this.db.getHealthyList();
     let healthyNodes = [];
+    let txList = [
+      'C5O7sDrPAeIGHopFFW1UfNKTzJCvfh3lfUQtHqgJVh0', // transaction
+      'vm9Rhu3CAprz5deglsVJu_dsoLvZsVAIs9Fn8WOruCY', // transaction
+      'J8UZQeEud6QwXQkkQKLf3Wc8-7a5YBMqP96be3hkuUs', // NFT
+    ];
 
     // double check the healthy nodes are still healthy
     for (let node of oldHealthyNodes) {
       const peerInstance = new Peer(node);
-      let result = await peerInstance.fullScan(node, this.txId);
-      if (!result.isHealthy) {
+      let isNodeHealthy = true; 
+      for (let tx of txList) {
+        let result = await peerInstance.fullScan(node, tx);
+        if (!result.isHealthy || !result.containsTx) {
+          console.log('Found unhealthy transaction', tx, 'in node', node);
+          isNodeHealthy = false; 
+          break; 
+        }
+      }
+      if (!isNodeHealthy) {
         console.log('removing unhealthy node', node);
         await this.db.deleteItem(node);
       } else {
@@ -336,7 +349,9 @@ class Gatherer {
     } else {
       let status =
         ((this.newFound - this.pending.length) / this.newFound) * 100;
-      console.log(`Round ${this.round} Loading status: ${status.toFixed(2)}%...`);
+      console.log(
+        `Round ${this.round} Loading status: ${status.toFixed(2)}%...`,
+      );
     }
   };
 

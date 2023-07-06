@@ -77,14 +77,16 @@ class Peer {
         const response = await axios.get(txurl.href, this.headers);
         // console.log('payload returned from ' + peerUrl, payload)
         // console.log(response.status)
-        if (response.status == 200) {
+        if (response.status == 200 && response.data !== 'Not Found.') {
+          // console.log(`Exist tx ${response.data.id} on ${peer}`);
           this.containsTx = true;
         }
       } catch (err) {
         // console.log("can't fetch " + this.location + ' ' + err);
+        this.containsTx = false;
       }
     }
-    return this;
+    return this.containsTx;
   };
 
 }

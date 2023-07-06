@@ -128,7 +128,7 @@ class Gatherer {
       for (let tx of txList) {
         let result = await peerInstance.fullScan(node, tx);
         if (!result.isHealthy || !result.containsTx) {
-          console.log('Found unhealthy transaction', tx, 'in node', node);
+          console.log('Found unhealthy transaction in node', node);
           isNodeHealthy = false; 
           break; 
         }

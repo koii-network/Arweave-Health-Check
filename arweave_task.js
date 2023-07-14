@@ -8,6 +8,7 @@ const { Web3Storage, getFilesFromPath, File } = require('web3.storage');
 const storageClient = new Web3Storage({
   token: process.env.SECRET_WEB3_STORAGE_KEY,
 });
+const { getRandomTransactionId } = require('./helpers/randomTx');
 
 const credentials = {}; // arweave doesn't need credentials
 
@@ -24,12 +25,14 @@ const run = async round => {
     query: query,
   };
 
+  let txid = await getRandomTransactionId();
+
   await dataDb.intializeData();
   const adapter = new Arweave(
     credentials,
     options.maxRetry,
     dataDb,
-    'twIEDggMpjrO_pXnRfVqoprVtiuf_XHxw72nQvWS8bE',
+    txid,
   );
 
   const gatherer = new Gatherer(dataDb, adapter, options, round);

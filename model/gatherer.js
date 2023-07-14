@@ -12,6 +12,7 @@
 require('dotenv').config();
 const Peer = require('../adapters/arweave/peer');
 const { Web3Storage, getFilesFromPath, File } = require('web3.storage');
+const { getRandomTransactionId } = require('../helpers/randomTx');
 const storageClient = new Web3Storage({
   token: process.env.SECRET_WEB3_STORAGE_KEY,
 });
@@ -76,7 +77,7 @@ class Gatherer {
     // 5. Save the second tier of items to the database with the 'pending' prefix
     // 6. Fetch the next page of items using the query provided
     // 7. Repeat steps 4-6 until the limit is reached or there are no more pages to fetch
-
+    console.log('startup txid: ', this.txId);
     await this.db.getPendingList().then(async pendingList => {
       if (pendingList) {
         console.log('start up pending list', pendingList);
@@ -86,7 +87,7 @@ class Gatherer {
       }
     });
 
-    let red = true;
+    let red = false;
     this.startPrinting();
     while (red) {
       try {
@@ -113,54 +114,122 @@ class Gatherer {
 
     // III. Diagnostics
     // 8. Return live asynchronous updates of the items being saved to the database
-    let oldHealthyNodes = await this.db.getHealthyList();
+    // let oldHealthyNodes = await this.db.getHealthyList();
+    let oldHealthyNodes = [
+      "135.181.137.241:1984",
+      "206.189.70.139:1984",
+      "35.78.175.38:1984",
+      "188.166.192.169:1984",
+      "216.66.68.20:1984",
+      "82.135.124.93:1984",
+      "59.124.202.196:1984",
+      "65.21.204.231:1984",
+      "95.217.87.210:1984",
+      "117.175.178.149:1984",
+      "220.93.93.86:1984",
+      "81.7.15.172:1984",
+      "52.195.0.107:1984",
+      "121.179.79.7:1984",
+      "3.34.96.164:1984",
+      "114.55.146.211:1984",
+      "203.184.214.226:1984",
+      "65.21.201.96:1984",
+      "157.230.2.154:1984",
+      "178.128.89.236:1984",
+      "159.69.65.150:1984",
+      "157.230.102.219:1984",
+      "138.197.232.192:1984",
+      "206.83.144.16:1984",
+      "176.9.24.56:1984",
+      "121.133.147.61:1984",
+      "212.25.52.23:10019",
+      "23.162.112.251:1984",
+      "69.194.1.66:1984",
+      "95.216.19.227:1984",
+      "139.59.51.59:1984",
+      "220.93.93.86:1985",
+      "23.88.65.188:1984",
+      "188.166.200.45:1984",
+      "206.83.144.17:1984",
+      "162.195.152.107:1984",
+      "162.220.53.21:1984",
+      "101.70.226.192:1984",
+      "142.132.129.96:1984",
+      "164.128.161.197:1984",
+      "178.62.222.154:1984",
+      "69.197.157.250:1984",
+      "94.19.6.232:1984",
+      "3.36.250.149:1984",
+      "148.251.135.52:1984",
+      "18.143.34.211:1984",
+      "163.47.11.64:1984",
+      "65.21.73.167:1984",
+      "206.83.144.15:1984",
+      "139.59.19.218:1984",
+      "13.215.88.109:1984"
+      ];
     let healthyNodes = [];
-    let txList = [
-      'C5O7sDrPAeIGHopFFW1UfNKTzJCvfh3lfUQtHqgJVh0', // transaction
-      'vm9Rhu3CAprz5deglsVJu_dsoLvZsVAIs9Fn8WOruCY', // transaction
-      'J8UZQeEud6QwXQkkQKLf3Wc8-7a5YBMqP96be3hkuUs', // NFT
-    ];
+    // let txList = [
+    //   'C5O7sDrPAeIGHopFFW1UfNKTzJCvfh3lfUQtHqgJVh0', // transaction
+    //   'vm9Rhu3CAprz5deglsVJu_dsoLvZsVAIs9Fn8WOruCY', // transaction
+    //   'J8UZQeEud6QwXQkkQKLf3Wc8-7a5YBMqP96be3hkuUs', // NFT
+    // ];
+    let txList = await this.getRandomTxList();
+    console.log('txList is ', txList);
 
     // double check the healthy nodes are still healthy
-    for (let node of oldHealthyNodes) {
-      const peerInstance = new Peer(node);
-      let isNodeHealthy = true; 
-      for (let tx of txList) {
+    let data = {
+      totalNodes: this.newFound,
+    };
+    
+    let healthyList = [];
+    
+    for (let tx of txList) {
+      let currentTxHealthyNodes = [];
+    
+      for (let node of oldHealthyNodes) {
+        const peerInstance = new Peer(node);
         let result = await peerInstance.fullScan(node, tx);
-        if (!result.isHealthy || !result.containsTx) {
-          console.log('Found unhealthy transaction in node', node);
-          isNodeHealthy = false; 
-          break; 
+    
+        if (result.isHealthy && result.containsTx) {
+          if (!data[tx]) {
+            data[tx] = []; // Initialize data[tx] as an array
+          }
+          data[tx].push(node);
+          currentTxHealthyNodes.push(node);
+        } else {
+          // console.log('Found unhealthy transaction', tx, 'in node', node);
+          await this.db.deleteItem(node);
         }
       }
-      if (!isNodeHealthy) {
-        console.log('removing unhealthy node', node);
-        await this.db.deleteItem(node);
-      } else {
-        healthyNodes.push(node);
+    
+      // If currentTxHealthyNodes is empty, set the value to 'Not Found'
+      if (currentTxHealthyNodes.length === 0) {
+        data[tx] = 'Not Found';
+      }
+    
+      // On first iteration, initialize healthyList with currentTxHealthyNodes
+      // On following iterations, find intersection of healthyList and currentTxHealthyNodes
+      if (healthyList.length === 0) {
+        healthyList = [...currentTxHealthyNodes];
+      } else if (currentTxHealthyNodes.length !== 0) { // Only update healthyList if currentTxHealthyNodes is not empty
+        healthyList = healthyList.filter(node => currentTxHealthyNodes.includes(node));
       }
     }
+    
+    data.healthyList = healthyList;
+    
+    console.log('Data:', data);
 
-    if (healthyNodes) {
-      console.log('healthy nodes', healthyNodes);
-      let totalNodes = this.newFound;
-      console.log('Total nodes', totalNodes);
-      let data = {
-        healthyNodes: healthyNodes,
-        totalNodes: totalNodes,
-      };
-      const cid = await this.uploadIPFS(data);
-      // IV. Auditing and Proofs
-      // 9. Incrementally upload new items to IPFS and save the IPFS hash to the database (i.e. db.put('ipfs:' + item.id + ':data, ipfsHash)) for use in the rest apis
-      healthyNodes.forEach(async peer => {
-        // console.log ('peer', peer);
-        await this.db.setIPFS(peer, cid);
-      });
+    const cid = await this.uploadIPFS(data);
+    // IV. Auditing and Proofs
+    // 9. Incrementally upload new items to IPFS and save the IPFS hash to the database (i.e. db.put('ipfs:' + item.id + ':data, ipfsHash)) for use in the rest apis
+    healthyNodes.forEach(async peer => {
+      // console.log ('peer', peer);
+      await this.db.setIPFS(peer, cid);
+    });
 
-      return cid;
-    } else {
-      console.log('no healthy nodes found');
-    }
+    return cid;
   };
 
   uploadIPFS = async function (data) {
@@ -277,6 +346,20 @@ class Gatherer {
     } catch (err) {
       console.log('error selecting random node', err);
       return;
+    }
+  };
+
+  getRandomTxList = async function () {
+    try {
+      const txList = [];
+      for (let i = 0; i < 5; i++) {
+        const txId = await getRandomTransactionId();
+        txList.push(txId);
+      }
+      console.log(txList);
+      return txList;
+    } catch (error) {
+      console.error('Failed to get random transaction list:', error);
     }
   };
 

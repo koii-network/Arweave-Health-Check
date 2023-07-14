@@ -72,7 +72,7 @@ class Peer {
 
     if (this.isHealthy) {
       try {
-        let txurl = new URL(`http://${peer}/tx/${txid}`);
+        let txurl = new URL(`http://${peer}/tx/${txid}/status`);
         // console.log('sending txid check for ', txurl.href);
         const response = await axios.get(txurl.href, this.headers);
         // console.log('payload returned from ' + peerUrl, payload)

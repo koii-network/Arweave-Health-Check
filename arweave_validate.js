@@ -33,7 +33,7 @@ module.exports = async (submission_value, round) => {
 // verify the linktree signature by querying the other node to get it's copy of the linktree
 async function verifyPeers(proofs) {
   const healthyListRAW = await dataFromCid(proofs);
-  const healthyList = healthyListRAW.data.healthyNodes;
+  const healthyList = healthyListRAW.data.healthyList;
   if (!healthyList) {
     console.log('No data received from web3.storage');
     return false;

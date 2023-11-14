@@ -7,7 +7,7 @@ class CoreLogic {
     // run arweave web scrapping
     console.log('********Arweave Webscrapiing started**********');
 
-    console.log("Scraping task called in round", round)
+    console.log('Scraping task called in round', round);
     const proof_cid = await arweave_task(round);
 
     if (proof_cid) {
@@ -26,7 +26,7 @@ class CoreLogic {
   async fetchSubmission(round) {
     console.log('**********IN FETCH SUBMISSION**********');
 
-    console.log('FetchSubmission called in round', round)
+    console.log('FetchSubmission called in round', round);
 
     await dataDb.intializeData();
     const proof_cid = await dataDb.getProof(round); // retrieves the cid
@@ -39,23 +39,20 @@ class CoreLogic {
     try {
       console.log('GenerateDistributionList called');
       console.log('I am selected node');
-      console.log('Round', round);
-      // The logic to generate the distribution list here
+
+      // Write the logic to generate the distribution list here by introducing the rules of your choice
+
+      /*  **** SAMPLE LOGIC FOR GENERATING DISTRIBUTION LIST ******/
 
       let distributionList = {};
       let distributionCandidates = [];
       let taskAccountDataJSON = await namespaceWrapper.getTaskState();
-
       if (taskAccountDataJSON == null) taskAccountDataJSON = _dummyTaskState;
-
-      console.log('Task Account Data', taskAccountDataJSON);
-
       const submissions = taskAccountDataJSON.submissions[round];
       const submissions_audit_trigger =
         taskAccountDataJSON.submissions_audit_trigger[round];
-
       if (submissions == null) {
-        console.log('No submisssions found in N-2 round');
+        console.log(`No submisssions found in round ${round}`);
         return distributionList;
       } else {
         const keys = Object.keys(submissions);
@@ -115,19 +112,15 @@ class CoreLogic {
       // now distribute the rewards based on the valid submissions
       // Here it is assumed that all the nodes doing valid submission gets the same reward
 
-      console.log("LENGTH", distributionCandidates.length);
-      console.log("Bounty Amount", taskAccountDataJSON.bounty_amount_per_round);
-
-      const reward =
+      const reward = Math.ceil(
         taskAccountDataJSON.bounty_amount_per_round /
-        distributionCandidates.length;
+          distributionCandidates.length,
+      );
       console.log('REWARD RECEIVED BY EACH NODE', reward);
       for (let i = 0; i < distributionCandidates.length; i++) {
         distributionList[distributionCandidates[i]] = reward;
       }
-
       console.log('Distribution List', distributionList);
-
       return distributionList;
     } catch (err) {
       console.log('ERROR IN GENERATING DISTRIBUTION LIST', err);

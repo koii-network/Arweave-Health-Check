@@ -11,16 +11,15 @@
 
 require('dotenv').config();
 const Peer = require('../adapters/arweave/peer');
-const { Web3Storage, getFilesFromPath, File } = require('web3.storage');
+// const { Web3Storage, getFilesFromPath, File } = require('web3.storage');
 const { getRandomTransactionId } = require('../helpers/randomTx');
 const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
 const storageClient = new SpheronClient({
   token: process.env.SPHERON_WEB3_STORAGE_KEY,
-  apiUrl: 'https://temp-api-dev.spheron.network',
 });
 const { Queue } = require('async-await-queue');
 const { namespaceWrapper } = require('../namespaceWrapper');
-
+const fs = require('fs');
 class Gatherer {
   constructor(db, adapter, options, round) {
     console.log('creating new adapter', db.name, adapter.txId, options);
@@ -183,16 +182,16 @@ class Gatherer {
     let data = {
       totalNodes: this.newFound,
     };
-    
+
     let healthyList = [];
-    
+
     for (let tx of txList) {
       let currentTxHealthyNodes = [];
-    
+
       for (let node of oldHealthyNodes) {
         const peerInstance = new Peer(node);
         let result = await peerInstance.fullScan(node, tx);
-    
+
         if (result.isHealthy && result.containsTx) {
           if (!data[tx]) {
             data[tx] = []; // Initialize data[tx] as an array
@@ -204,23 +203,26 @@ class Gatherer {
           await this.db.deleteItem(node);
         }
       }
-    
+
       // If currentTxHealthyNodes is empty, set the value to 'Not Found'
       if (currentTxHealthyNodes.length === 0) {
         data[tx] = 'Not Found';
       }
-    
+
       // On first iteration, initialize healthyList with currentTxHealthyNodes
       // On following iterations, find intersection of healthyList and currentTxHealthyNodes
       if (healthyList.length === 0) {
         healthyList = [...currentTxHealthyNodes];
-      } else if (currentTxHealthyNodes.length !== 0) { // Only update healthyList if currentTxHealthyNodes is not empty
-        healthyList = healthyList.filter(node => currentTxHealthyNodes.includes(node));
+      } else if (currentTxHealthyNodes.length !== 0) {
+        // Only update healthyList if currentTxHealthyNodes is not empty
+        healthyList = healthyList.filter(node =>
+          currentTxHealthyNodes.includes(node),
+        );
       }
     }
-    
+
     data.healthyList = healthyList;
-    
+
     console.log('Data:', data);
 
     const cid = await this.uploadIPFS(data);
@@ -236,18 +238,10 @@ class Gatherer {
 
   uploadIPFS = async function (data) {
     let path = `healthyList.json`;
-
+    let basePath = '';
     try {
-      await namespaceWrapper.fs(
-        'writeFile',
-        path,
-        JSON.stringify(data),
-        err => {
-          if (err) {
-            console.error(err);
-          }
-        },
-      );
+      basePath = await namespaceWrapper.getBasePath();
+      fs.writeFileSync(`${basePath}/${path}`, JSON.stringify(data));
     } catch (err) {
       console.log(err);
     }
@@ -255,44 +249,23 @@ class Gatherer {
     if (storageClient) {
       let cid;
       try {
-        const basePath = await namespaceWrapper.getBasePath();
-        let file = await getFilesFromPath(`${basePath}/${path}`);
-        cid = await storageClient.upload(file, {
+        console.log(`${basePath}/${path}`)
+        let spheronData = await storageClient.upload(`${basePath}/${path}`, {
           protocol: ProtocolEnum.IPFS,
           name: 'test',
           onUploadInitiated: uploadId => {
             console.log(`Upload with id ${uploadId} started...`);
           },
           onChunkUploaded: (uploadedSize, totalSize) => {
-            currentlyUploaded += uploadedSize;
-            console.log(`Uploaded ${currentlyUploaded} of ${totalSize} Bytes.`);
+            console.log(`Uploaded ${uploadedSize} of ${totalSize} Bytes.`);
           },
         });
-      
+        cid = spheronData.cid;
+
         console.log(`CID: ${cid}`);
         console.log('Arweave healthy list to IPFS: ', cid);
       } catch (err) {
-        console.log('error uploading to IPFS, trying again');
-        try {
-          const uploadData = Buffer.from(JSON.stringify(data), 'utf8');
-          let file = new File([uploadData], path, {
-            type: 'application/json',
-          });
-          cid = await storageClient.upload(file, {
-            protocol: ProtocolEnum.IPFS,
-            name: 'test',
-            onUploadInitiated: uploadId => {
-              console.log(`Upload with id ${uploadId} started...`);
-            },
-            onChunkUploaded: (uploadedSize, totalSize) => {
-              currentlyUploaded += uploadedSize;
-              console.log(`Uploaded ${currentlyUploaded} of ${totalSize} Bytes.`);
-            },
-          });
-          console.log('Arweave healthy list to IPFS: ', cid);
-        } catch (err) {
-          console.log(err);
-        }
+        console.log('error uploading to IPFS, trying again',err);
       }
       return cid;
     } else {

@@ -695,7 +695,7 @@ class NamespaceWrapper {
       );
       return basePath;
     } else {
-      return './';
+      return '.';
     }
 
   }

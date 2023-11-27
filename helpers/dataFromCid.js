@@ -1,16 +1,14 @@
-const axios = require("axios");
-const { Web3Storage, getFilesFromPath } = require("web3.storage");
-const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
+const axios = require('axios');
+const { SpheronClient } = require('@spheron/storage');
 const storageClient = new SpheronClient({
   token: process.env.SPHERON_WEB3_STORAGE_KEY,
-  apiUrl: 'https://temp-api-dev.spheron.network',
 });
 
 module.exports = async (cid) => {
   console.log("CID", cid);
   if (storageClient) {
-    const res = await storageClient.get(cid);
-    if (!res.ok) {
+    const res = await storageClient.getCIDStatus(cid);
+    if (!res.pinStatus) {
       // voting false
       console.log("VOTE FALSE");
 
@@ -18,9 +16,6 @@ module.exports = async (cid) => {
       //console.log("VOTE", vote);
       return false;
     } else {
-      const file = await res.files();
-      //console.log("FILE", file);
-      //console.log("CID", file[0].cid);
       let headers = {
         headers: {
           "User-Agent":
@@ -28,7 +23,7 @@ module.exports = async (cid) => {
         },
       };
      
-      const url = `https://${file[0].cid}.ipfs.w3s.link/?filename=${file[0].name}`;
+      const url = `https://${res.pinStatus.cid}.ipfs.w3s.link/healthyList.json`;
       console.log("URL", url);
       try {
         const output = await axios.get(url, headers);

@@ -14,7 +14,8 @@ const Peer = require('../adapters/arweave/peer');
 const { Web3Storage, getFilesFromPath, File } = require('web3.storage');
 const { getRandomTransactionId } = require('../helpers/randomTx');
 const storageClient = new Web3Storage({
-  token: process.env.SECRET_WEB3_STORAGE_KEY,
+  token: process.env.SPHERON_WEB3_STORAGE_KEY,
+  apiUrl: 'https://temp-api-dev.spheron.network',
 });
 const { Queue } = require('async-await-queue');
 const { namespaceWrapper } = require('../namespaceWrapper');
@@ -255,7 +256,19 @@ class Gatherer {
       try {
         const basePath = await namespaceWrapper.getBasePath();
         let file = await getFilesFromPath(`${basePath}/${path}`);
-        cid = await storageClient.put(file);
+        cid = await storageClient.upload(file, {
+          protocol: ProtocolEnum.IPFS,
+          name: 'test',
+          onUploadInitiated: uploadId => {
+            console.log(`Upload with id ${uploadId} started...`);
+          },
+          onChunkUploaded: (uploadedSize, totalSize) => {
+            currentlyUploaded += uploadedSize;
+            console.log(`Uploaded ${currentlyUploaded} of ${totalSize} Bytes.`);
+          },
+        });
+      
+        console.log(`CID: ${cid}`);
         console.log('Arweave healthy list to IPFS: ', cid);
       } catch (err) {
         console.log('error uploading to IPFS, trying again');
@@ -264,7 +277,17 @@ class Gatherer {
           let file = new File([uploadData], path, {
             type: 'application/json',
           });
-          cid = await storageClient.put([file]);
+          cid = await storageClient.upload(file, {
+            protocol: ProtocolEnum.IPFS,
+            name: 'test',
+            onUploadInitiated: uploadId => {
+              console.log(`Upload with id ${uploadId} started...`);
+            },
+            onChunkUploaded: (uploadedSize, totalSize) => {
+              currentlyUploaded += uploadedSize;
+              console.log(`Uploaded ${currentlyUploaded} of ${totalSize} Bytes.`);
+            },
+          });
           console.log('Arweave healthy list to IPFS: ', cid);
         } catch (err) {
           console.log(err);

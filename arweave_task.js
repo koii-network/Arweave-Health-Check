@@ -6,7 +6,8 @@ const bs58 = require('bs58');
 const dataDb = require('./helpers/db');
 const { Web3Storage, getFilesFromPath, File } = require('web3.storage');
 const storageClient = new Web3Storage({
-  token: process.env.SECRET_WEB3_STORAGE_KEY,
+  token: process.env.SPHERON_WEB3_STORAGE_KEY,
+  apiUrl: 'https://temp-api-dev.spheron.network',
 });
 const { getRandomTransactionId } = require('./helpers/randomTx');
 
@@ -80,7 +81,17 @@ async function uploadIPFS(data, round) {
       const basePath = await namespaceWrapper.getBasePath();
       let file = await getFilesFromPath(`${basePath}/${proofPath}`);
 
-      proof_cid = await storageClient.put(file);
+      proof_cid = await storageClient.upload(file, {
+        protocol: ProtocolEnum.IPFS,
+        name: 'test',
+        onUploadInitiated: uploadId => {
+          console.log(`Upload with id ${uploadId} started...`);
+        },
+        onChunkUploaded: (uploadedSize, totalSize) => {
+          currentlyUploaded += uploadedSize;
+          console.log(`Uploaded ${currentlyUploaded} of ${totalSize} Bytes.`);
+        },
+      });
       console.log(`Proofs of healthy list in round ${round} : `, proof_cid);
       try {
         await namespaceWrapper.fs('unlink', proofPath);
@@ -95,7 +106,17 @@ async function uploadIPFS(data, round) {
           type: 'application/json',
         });
 
-        proof_cid = await storageClient.put([file]);
+        proof_cid = await storageClient.upload(file, {
+          protocol: ProtocolEnum.IPFS,
+          name: 'test',
+          onUploadInitiated: uploadId => {
+            console.log(`Upload with id ${uploadId} started...`);
+          },
+          onChunkUploaded: (uploadedSize, totalSize) => {
+            currentlyUploaded += uploadedSize;
+            console.log(`Uploaded ${currentlyUploaded} of ${totalSize} Bytes.`);
+          },
+        });
         console.log(`Proofs of healthy list in round ${round} : `, proof_cid);
       } catch (err) {
         console.log(err);

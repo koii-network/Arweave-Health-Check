@@ -13,7 +13,8 @@ require('dotenv').config();
 const Peer = require('../adapters/arweave/peer');
 const { Web3Storage, getFilesFromPath, File } = require('web3.storage');
 const { getRandomTransactionId } = require('../helpers/randomTx');
-const storageClient = new Web3Storage({
+const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
+const storageClient = new SpheronClient({
   token: process.env.SPHERON_WEB3_STORAGE_KEY,
   apiUrl: 'https://temp-api-dev.spheron.network',
 });

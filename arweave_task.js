@@ -5,7 +5,8 @@ const nacl = require('tweetnacl');
 const bs58 = require('bs58');
 const dataDb = require('./helpers/db');
 const { Web3Storage, getFilesFromPath, File } = require('web3.storage');
-const storageClient = new Web3Storage({
+const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
+const storageClient = new SpheronClient({
   token: process.env.SPHERON_WEB3_STORAGE_KEY,
   apiUrl: 'https://temp-api-dev.spheron.network',
 });

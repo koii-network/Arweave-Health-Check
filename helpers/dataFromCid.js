@@ -1,7 +1,7 @@
 const axios = require('axios');
 const { SpheronClient } = require('@spheron/storage');
 const storageClient = new SpheronClient({
-  token: process.env.SPHERON_WEB3_STORAGE_KEY,
+  token: process.env.Spheron_Storage,
 });
 
 module.exports = async (cid) => {

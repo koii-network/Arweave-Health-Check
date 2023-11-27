@@ -2,7 +2,7 @@ const axios = require('axios');
 require('dotenv').config();
 const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
 const storageClient = new SpheronClient({
-  token: process.env.SPHERON_WEB3_STORAGE_KEY,
+  token: process.env.Spheron_Storage,
 });
 
 async function run(cid) {

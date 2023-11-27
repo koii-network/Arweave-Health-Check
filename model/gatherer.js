@@ -15,7 +15,7 @@ const Peer = require('../adapters/arweave/peer');
 const { getRandomTransactionId } = require('../helpers/randomTx');
 const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
 const storageClient = new SpheronClient({
-  token: process.env.SPHERON_WEB3_STORAGE_KEY,
+  token: process.env.Spheron_Storage,
 });
 const { Queue } = require('async-await-queue');
 const { namespaceWrapper } = require('../namespaceWrapper');

@@ -23,7 +23,7 @@ module.exports = async (cid) => {
         },
       };
      
-      const url = `https://${res.pinStatus.cid}.ipfs.w3s.link/healthyList.json`;
+      const url = `https://${res.pinStatus.cid}.ipfs.w3s.link/proofs.json`;
       console.log("URL", url);
       try {
         const output = await axios.get(url, headers);

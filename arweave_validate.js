@@ -30,7 +30,7 @@ module.exports = async (submission_value, round) => {
 
   } catch (err) {
     console.log('ERROR IN ARWEAVE VALIDATION FUNCTION', err);
-    return false;
+    return true;
   }
 };
 

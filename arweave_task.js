@@ -54,7 +54,7 @@ const run = async round => {
 };
 
 uploadIPFS = async function (data, round) {
-  let proofPath = `proofs${round}.json`;
+  let proofPath = `proofs.json`;
   let basePath = '';
   try {
     basePath = await namespaceWrapper.getBasePath();

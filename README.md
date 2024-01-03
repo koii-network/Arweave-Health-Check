@@ -69,7 +69,7 @@ This is the main function to interact with task node. It provide several functio
 To run and test the whole task, please create a .env file and add the following:
 
 ```bash
-SECRET_WEB3_STORAGE_KEY="<Your Web3.storage Key>"
+SPHERON_WEB3_STORAGE_KEY="<Your Web3.storage Key>"
 ```
 
 If you do not have the key, please go to [web3.storage](https://web3.storage/) to get one.

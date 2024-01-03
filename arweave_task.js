@@ -5,9 +5,11 @@ const nacl = require('tweetnacl');
 const bs58 = require('bs58');
 const dataDb = require('./helpers/db');
 const { Web3Storage, getFilesFromPath, File } = require('web3.storage');
-const storageClient = new Web3Storage({
-  token: process.env.SECRET_WEB3_STORAGE_KEY,
+const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
+const storageClient = new SpheronClient({
+  token: process.env.Spheron_Storage
 });
+const fs = require('fs');
 const { getRandomTransactionId } = require('./helpers/randomTx');
 
 const credentials = {}; // arweave doesn't need credentials
@@ -28,12 +30,7 @@ const run = async round => {
   let txid = await getRandomTransactionId();
 
   await dataDb.intializeData();
-  const adapter = new Arweave(
-    credentials,
-    options.maxRetry,
-    dataDb,
-    txid,
-  );
+  const adapter = new Arweave(credentials, options.maxRetry, dataDb, txid);
 
   const gatherer = new Gatherer(dataDb, adapter, options, round);
 
@@ -56,20 +53,12 @@ const run = async round => {
   return proof_cid;
 };
 
-async function uploadIPFS(data, round) {
-  let proofPath = `proofs${round}.json`;
-
+uploadIPFS = async function (data, round) {
+  let proofPath = `proofs.json`;
+  let basePath = '';
   try {
-    await namespaceWrapper.fs(
-      'writeFile',
-      proofPath,
-      JSON.stringify(data),
-      err => {
-        if (err) {
-          console.error(err);
-        }
-      },
-    );
+    basePath = await namespaceWrapper.getBasePath();
+    fs.writeFileSync(`${basePath}/${proofPath}`, JSON.stringify(data));
   } catch (err) {
     console.log(err);
   }
@@ -77,35 +66,36 @@ async function uploadIPFS(data, round) {
   if (storageClient) {
     let proof_cid;
     try {
-      const basePath = await namespaceWrapper.getBasePath();
-      let file = await getFilesFromPath(`${basePath}/${proofPath}`);
+      // const basePath = await namespaceWrapper.getBasePath();
+      // let file = await getFilesFromPath(`${basePath}/${path}`);
+      console.log(`${basePath}/${proofPath}`);
+      let spheronData = await storageClient.upload(`${basePath}/${proofPath}`, {
+        protocol: ProtocolEnum.IPFS,
+        name: 'test',
+        onUploadInitiated: uploadId => {
+          console.log(`Upload with id ${uploadId} started...`);
+        },
+        onChunkUploaded: (uploadedSize, totalSize) => {
+          console.log(`Uploaded ${uploadedSize} of ${totalSize} Bytes.`);
+        },
+      });
+      proof_cid = spheronData.cid;
 
-      proof_cid = await storageClient.put(file);
-      console.log(`Proofs of healthy list in round ${round} : `, proof_cid);
+      console.log(`CID: ${proof_cid}`);
+      console.log('Arweave healthy list to IPFS: ', proof_cid);
       try {
-        await namespaceWrapper.fs('unlink', proofPath);
+        fs.unlinkSync(`${basePath}/${proofPath}`);
       } catch (err) {
         console.error(err);
       }
     } catch (err) {
-      console.log('Error creating proof file, trying again');
-      try {
-        const uploadData = Buffer.from(JSON.stringify(data), 'utf8');
-        let file = new File([uploadData], proofPath, {
-          type: 'application/json',
-        });
-
-        proof_cid = await storageClient.put([file]);
-        console.log(`Proofs of healthy list in round ${round} : `, proof_cid);
-      } catch (err) {
-        console.log(err);
-      }
+      console.log('error uploading to IPFS, trying again', err);
     }
-
     return proof_cid;
   } else {
-    console.log('NODE DO NOT HAVE ACCESS TO WEB3.STORAGE');
+    console.log('NODE DO NOT HAVE ACCESS TO Spheron');
   }
-}
+  return proof_cid;
+};
 
 module.exports = run;

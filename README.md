@@ -1,93 +1,83 @@
-# Task Arweave
+<h1 align="center">
+  <img src="https://raw.githubusercontent.com/koii-network/koii.X/main/.github/images/koii_logo.svg" width="224px"/><br/>
+  Arweave Health Check Task
+</h1>
+<p align="center">
+  <img src="https://img.shields.io/badge/JavaScript-007ACC?style=flat&logo=javascript&logoColor=white" alt="javascript" />&nbsp;
+   <a href="https://discord.gg/koii" target="_blank"><img src="https://img.shields.io/badge/Discord-7289DA?style=flat&logo=discord&logoColor=white" alt="cli version" /></a>&nbsp;
+   <a href="http://koii.network/" target="_blank"> <img src="https://img.shields.io/badge/made%20by-koii-blue" alt="made-by-koii" /></a>&nbsp;
+</p>
 
+## 📖 Overview
 
+This task is a simple health check for Arweave that running on Koii.network K2 nodes. It will check the following:
 
-## Getting started
+- The health nodes on the Arweave network
+- The health of the transaction on each nodes
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+It will return the number of all nodes and healthy nodes, then the data will upload to IPFS and return the CID.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+## 📦 Install
 
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
+```bash
+npm install or yarn install
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/koii-network/dev-blue/task-arweave.git
-git branch -M main
-git push -uf origin main
+
+## 🚀 Usage
+
+```bash
+npm run test or yarn test
 ```
 
-## Integrate with your tools
+It will run the whole task and return the result.
 
-- [ ] [Set up project integrations](https://gitlab.com/koii-network/dev-blue/task-arweave/-/settings/integrations)
+## 📝 Main Functions
 
-## Collaborate with your team
+- coreLogic.js
+  - arweave_task()
+  - arweave_validate()
+- data.js
+    - addData()
+    - getData()
+- namespaceWrapper.js
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+### Core Logic
 
-## Test and Deploy
+This is the main function that will run the whole task. It will call the `arweave_task()` function to get the data and upload to IPFS. Then in `fetchSubmission()` function, it will upload cid to K2 as the submission in a specific round. In next round it will call the `arweave_validate()` function to validate the data. If the data is valid, the task Vote is true, your submission will be in the distribution list and wait to get the reward.
 
-Use the built-in continuous integration in GitLab.
+#### arweave_task()
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+This function will get the data from Arweave and upload to IPFS. It will return the number of all nodes and healthy nodes, then the data will upload to IPFS and return the CID.
 
-***
+#### arweave_validate()
 
-# Editing this README
+This function will validate the submission from K2, which contain proofs of node and CID from IPFS. It will return true if the data is valid. Otherwise, it will return false.
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+#### Data
 
-## Suggestions for a good README
+This is the main database function. It use `nedb` to store the data. In database, it will have `pendingId` which is arweave nodes wait to be verified and `healthyID` which is the healthy nodes. It will also have the data from IPFS.
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+#### NamespaceWrapper
 
-## Name
-Choose a self-explaining name for your project.
+This is the main function to interact with task node. It provide several functions to interact with task node. For example:
+    - namespaceWrapper.fs(). It use to wirte or read file if needed.
+    - namespaceWrapper.storeGet(). It use to store data in database.
+    - namespaceWrapper.getRound(). It use to get current round of task.
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+## Run and test
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+To run and test the whole task, please create a .env file and add the following:
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+```bash
+SPHERON_WEB3_STORAGE_KEY="<Your Web3.storage Key>"
+```
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+If you do not have the key, please go to [web3.storage](https://web3.storage/) to get one.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+Then run the following command:
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+```bash
+npm run test or yarn test
+```
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+To update the testing rules, please go to `tests/main.test.js`.

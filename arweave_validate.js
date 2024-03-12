@@ -6,7 +6,7 @@ const { default: axios } = require('axios');
 module.exports = async (submission_value, round) => {
   console.log('******/ Areawve Scrapping VALIDATION Task FUNCTION /******');
   try {
-    const outputraw = await dataFromCid(submission_value);
+    const outputraw = await dataFromCid(submission_value, 'proofs.json');
     const output = outputraw.data;
     console.log('OUTPUT', output);
 
@@ -36,7 +36,7 @@ module.exports = async (submission_value, round) => {
 
 // verify the linktree signature by querying the other node to get it's copy of the linktree
 async function verifyPeers(proofs) {
-  const healthyListRAW = await dataFromCid(proofs);
+  const healthyListRAW = await dataFromCid(proofs, 'healthyList.json');
   const healthyList = healthyListRAW.data.healthyList;
   if (!healthyList) {
     console.log('No data received from IPFS');

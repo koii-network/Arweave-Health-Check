@@ -541,7 +541,7 @@ class NamespaceWrapper {
       const submitterAccountKeyPair = await this.getSubmitterAccount();
       const submitterPubkey = submitterAccountKeyPair.publicKey.toBase58();
       for (let index of uniqueIndices) {
-        let candidatePublicKey = keys[i];
+        let candidatePublicKey = keys[index];
         // console.log('FOR CANDIDATE KEY', candidatePublicKey);
         let candidateKeyPairPublicKey = new PublicKey(keys[index]);
         if (candidatePublicKey == submitterPubkey) {

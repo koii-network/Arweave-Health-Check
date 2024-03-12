@@ -68,20 +68,20 @@ uploadIPFS = async function (data, round) {
     try {
       // const basePath = await namespaceWrapper.getBasePath();
       // let file = await getFilesFromPath(`${basePath}/${path}`);
-      console.log(`${basePath}/${proofPath}`);
+      // console.log(`${basePath}/${proofPath}`);
       let spheronData = await storageClient.upload(`${basePath}/${proofPath}`, {
         protocol: ProtocolEnum.IPFS,
         name: 'test',
         onUploadInitiated: uploadId => {
-          console.log(`Upload with id ${uploadId} started...`);
+          // console.log(`Upload with id ${uploadId} started...`);
         },
         onChunkUploaded: (uploadedSize, totalSize) => {
-          console.log(`Uploaded ${uploadedSize} of ${totalSize} Bytes.`);
+          // console.log(`Uploaded ${uploadedSize} of ${totalSize} Bytes.`);
         },
       });
       proof_cid = spheronData.cid;
 
-      console.log(`CID: ${proof_cid}`);
+      // console.log(`CID: ${proof_cid}`);
       console.log('Arweave healthy list to IPFS: ', proof_cid);
       try {
         fs.unlinkSync(`${basePath}/${proofPath}`);

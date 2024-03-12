@@ -39,7 +39,7 @@ async function verifyPeers(proofs) {
   const healthyListRAW = await dataFromCid(proofs);
   const healthyList = healthyListRAW.data.healthyList;
   if (!healthyList) {
-    console.log('No data received from web3.storage');
+    console.log('No data received from IPFS');
     return false;
   } else if (healthyList == '[]') {
     console.log('No healthy list to verify');

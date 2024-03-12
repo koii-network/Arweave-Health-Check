@@ -7,7 +7,7 @@ class CoreLogic {
     // run arweave web scrapping
     console.log('********Arweave Webscrapiing started**********');
 
-    console.log('Scraping task called in round', round);
+    // console.log('Scraping task called in round', round);
     const proof_cid = await arweave_task(round);
 
     if (proof_cid) {
@@ -26,7 +26,7 @@ class CoreLogic {
   async fetchSubmission(round) {
     console.log('**********IN FETCH SUBMISSION**********');
 
-    console.log('FetchSubmission called in round', round);
+    // console.log('FetchSubmission called in round', round);
 
     await dataDb.intializeData();
     const proof_cid = await dataDb.getProof(round); // retrieves the cid
@@ -58,7 +58,7 @@ class CoreLogic {
         const keys = Object.keys(submissions);
         const values = Object.values(submissions);
         const size = values.length;
-        console.log('Submissions from last round: ', keys, values, size);
+        // console.log('Submissions from last round: ', keys, values, size);
 
         // Logic for slashing the stake of the candidate who has been audited and found to be false
         for (let i = 0; i < size; i++) {
@@ -67,10 +67,10 @@ class CoreLogic {
             submissions_audit_trigger &&
             submissions_audit_trigger[candidatePublicKey]
           ) {
-            console.log(
-              'distributions_audit_trigger votes ',
-              submissions_audit_trigger[candidatePublicKey].votes,
-            );
+            // console.log(
+            //   'distributions_audit_trigger votes ',
+            //   submissions_audit_trigger[candidatePublicKey].votes,
+            // );
             const votes = submissions_audit_trigger[candidatePublicKey].votes;
             if (votes.length === 0) {
               // slash 70% of the stake as still the audit is triggered but no votes are casted
@@ -153,11 +153,11 @@ class CoreLogic {
 
   // this function is called when a node is selected to validate the submission value
   async validateNode(submission_value, round) {
-    console.log('Received submission_value', submission_value, round);
+    // console.log('Received submission_value', submission_value, round);
 
     // import the arweave scrapping validate module
     const vote = await arweave_validate(submission_value, round);
-    console.log('Vote', vote);
+    // console.log('Vote', vote);
     return vote;
   }
 
@@ -185,7 +185,7 @@ class CoreLogic {
           round,
         ),
       );
-      console.log('FETCHED DISTRIBUTION LIST', fetchedDistributionList);
+      // console.log('FETCHED DISTRIBUTION LIST', fetchedDistributionList);
       const generateDistributionList = await this.generateDistributionList(
         round,
       );
@@ -193,11 +193,11 @@ class CoreLogic {
       // compare distribution list
 
       const parsed = JSON.parse(fetchedDistributionList);
-      console.log(
-        'compare distribution list',
-        parsed,
-        generateDistributionList,
-      );
+      // console.log(
+      //   'compare distribution list',
+      //   parsed,
+      //   generateDistributionList,
+      // );
       const result = await this.shallowEqual(parsed, generateDistributionList);
       console.log('RESULT', result);
       return result;
@@ -211,7 +211,7 @@ class CoreLogic {
   async submitTask(roundNumber) {
     console.log('submitTask called with round', roundNumber);
     try {
-      console.log('inside try');
+      // console.log('inside try');
       console.log(
         await namespaceWrapper.getSlot(),
         'current slot while calling submit',

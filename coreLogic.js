@@ -38,7 +38,7 @@ class CoreLogic {
   async generateDistributionList(round, _dummyTaskState) {
     try {
       console.log('GenerateDistributionList called');
-      console.log('I am selected node');
+      // console.log('I am selected node');
 
       // Write the logic to generate the distribution list here by introducing the rules of your choice
 

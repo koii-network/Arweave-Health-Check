@@ -280,7 +280,6 @@ class Gatherer {
               await new Promise(resolve => setTimeout(resolve, 10000)); // 10s delay
             } else {
               console.log('Max retries reached, exiting...');
-              return;
             }
           }
           break;

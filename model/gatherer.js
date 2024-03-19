@@ -242,36 +242,55 @@ class Gatherer {
     try {
       basePath = await namespaceWrapper.getBasePath();
       fs.writeFileSync(`${basePath}/${path}`, JSON.stringify(data));
+      let attempts = 0;
+      let maxRetries = 3;
+
+      if (storageClient) {
+        while (attempts < maxRetries) {
+          try {
+            let cid;
+            console.log(`${basePath}/${path}`);
+            let spheronData = await storageClient.upload(
+              `${basePath}/${path}`,
+              {
+                protocol: ProtocolEnum.IPFS,
+                name: 'taskData',
+                onUploadInitiated: uploadId => {
+                  // console.log(`Upload with id ${uploadId} started...`);
+                },
+                onChunkUploaded: (uploadedSize, totalSize) => {
+                  // console.log(`Uploaded ${uploadedSize} of ${totalSize} Bytes.`);
+                },
+              },
+            );
+            cid = spheronData.cid;
+
+            console.log(`CID: ${cid}`);
+            console.log('Arweave healthy list to IPFS: ', cid);
+            return cid;
+          } catch (err) {
+            console.log('error uploading to IPFS, trying again', err);
+            attempts++;
+            if (attempts < maxRetries) {
+              console.log(
+                `Waiting for 10 seconds before retrying... Attempt ${
+                  attempts + 1
+                }/${maxRetries}`,
+              );
+              await new Promise(resolve => setTimeout(resolve, 10000)); // 10s delay
+            } else {
+              console.log('Max retries reached, exiting...');
+              return;
+            }
+          }
+          break;
+        }
+      } else {
+        console.log('NODE DO NOT HAVE ACCESS TO SPHERON STORAGE');
+      }
     } catch (err) {
       console.log(err);
     }
-
-    if (storageClient) {
-      let cid;
-      try {
-        console.log(`${basePath}/${path}`)
-        let spheronData = await storageClient.upload(`${basePath}/${path}`, {
-          protocol: ProtocolEnum.IPFS,
-          name: 'taskData',
-          onUploadInitiated: uploadId => {
-            // console.log(`Upload with id ${uploadId} started...`);
-          },
-          onChunkUploaded: (uploadedSize, totalSize) => {
-            // console.log(`Uploaded ${uploadedSize} of ${totalSize} Bytes.`);
-          },
-        });
-        cid = spheronData.cid;
-
-        console.log(`CID: ${cid}`);
-        console.log('Arweave healthy list to IPFS: ', cid);
-      } catch (err) {
-        console.log('error uploading to IPFS, trying again',err);
-      }
-      return cid;
-    } else {
-      console.log('NODE DO NOT HAVE ACCESS TO SPHERON STORAGE');
-    }
-    return cid;
   };
 
   addBatch = async function () {

@@ -6,7 +6,7 @@ const bs58 = require('bs58');
 const dataDb = require('./helpers/db');
 const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
 const storageClient = new SpheronClient({
-  token: process.env.Spheron_Storage
+  token: process.env.Spheron_Storage,
 });
 const fs = require('fs');
 const { getRandomTransactionId } = require('./helpers/randomTx');
@@ -82,19 +82,19 @@ uploadIPFS = async function (data, round) {
 
       // console.log(`CID: ${proof_cid}`);
       console.log('Arweave healthy list to IPFS: ', proof_cid);
+
       try {
         fs.unlinkSync(`${basePath}/${proofPath}`);
       } catch (err) {
         console.error(err);
       }
+      return proof_cid;
     } catch (err) {
       console.log('error uploading to IPFS, trying again', err);
     }
-    return proof_cid;
   } else {
     console.log('NODE DO NOT HAVE ACCESS TO Spheron');
   }
-  return proof_cid;
 };
 
 module.exports = run;

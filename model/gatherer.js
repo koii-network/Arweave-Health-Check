@@ -252,12 +252,12 @@ class Gatherer {
         console.log(`${basePath}/${path}`)
         let spheronData = await storageClient.upload(`${basePath}/${path}`, {
           protocol: ProtocolEnum.IPFS,
-          name: 'test',
+          name: 'taskData',
           onUploadInitiated: uploadId => {
-            console.log(`Upload with id ${uploadId} started...`);
+            // console.log(`Upload with id ${uploadId} started...`);
           },
           onChunkUploaded: (uploadedSize, totalSize) => {
-            console.log(`Uploaded ${uploadedSize} of ${totalSize} Bytes.`);
+            // console.log(`Uploaded ${uploadedSize} of ${totalSize} Bytes.`);
           },
         });
         cid = spheronData.cid;
@@ -269,7 +269,7 @@ class Gatherer {
       }
       return cid;
     } else {
-      console.log('NODE DO NOT HAVE ACCESS TO WEB3.STORAGE');
+      console.log('NODE DO NOT HAVE ACCESS TO SPHERON STORAGE');
     }
     return cid;
   };

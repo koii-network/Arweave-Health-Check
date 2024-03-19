@@ -219,11 +219,13 @@ class CoreLogic {
       const submission = await this.fetchSubmission(roundNumber);
       console.log('SUBMISSION', submission);
       // submit the submission to the K2
-      await namespaceWrapper.checkSubmissionAndUpdateRound(
-        submission,
-        roundNumber,
-      );
-      console.log('after the submission call');
+      if (submission !== null) {
+        await namespaceWrapper.checkSubmissionAndUpdateRound(
+          submission,
+          roundNumber,
+        );
+        console.log('after the submission call');
+      }
     } catch (error) {
       console.log('error in submission', error);
     }

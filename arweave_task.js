@@ -70,7 +70,7 @@ uploadIPFS = async function (data, round) {
       // console.log(`${basePath}/${proofPath}`);
       let spheronData = await storageClient.upload(`${basePath}/${proofPath}`, {
         protocol: ProtocolEnum.IPFS,
-        name: 'test',
+        name: 'taskData',
         onUploadInitiated: uploadId => {
           // console.log(`Upload with id ${uploadId} started...`);
         },

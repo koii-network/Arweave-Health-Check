@@ -15,9 +15,9 @@ const credentials = {}; // arweave doesn't need credentials
 
 const run = async round => {
   // Load node's keypair from the JSON file
-  const keypair = await namespaceWrapper.getSubmitterAccount();
+  // const keypair = await namespaceWrapper.getSubmitterAccount();
 
-  let publicKeyHex = Buffer.from(keypair._keypair.publicKey).toString('hex');
+  // let publicKeyHex = Buffer.from(keypair._keypair.publicKey).toString('hex');
 
   let query = 'web3'; // the query our twitter search will use
 
@@ -36,20 +36,20 @@ const run = async round => {
   // run a gatherer to get 10 items
   let result = await gatherer.gather(10);
 
-  const messageUint8Array = new Uint8Array(Buffer.from(result));
+  // const messageUint8Array = new Uint8Array(Buffer.from(result));
 
-  const signedMessage = nacl.sign(messageUint8Array, keypair.secretKey);
-  const signature = signedMessage.slice(0, nacl.sign.signatureLength);
+  // const signedMessage = nacl.sign(messageUint8Array, keypair.secretKey);
+  // const signature = signedMessage.slice(0, nacl.sign.signatureLength);
 
-  const submission_value = {
-    proofs: result,
-    node_publicKey: publicKeyHex,
-    node_signature: bs58.encode(signature),
-  };
+  // const submission_value = {
+  //   proofs: result,
+  //   node_publicKey: publicKeyHex,
+    // node_signature: bs58.encode(signature),
+  // };
 
-  const proof_cid = await uploadIPFS(submission_value, round);
+  // const proof_cid = await uploadIPFS(submission_value, round);
 
-  return proof_cid;
+  return result;
 };
 
 uploadIPFS = async function (data, round) {

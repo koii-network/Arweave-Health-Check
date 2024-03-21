@@ -10,6 +10,7 @@ module.exports = async (cid, fileName) => {
   };
   const retryDelay = 5000;
   const url = `https://${cid}.ipfs.w3s.link/${fileName}`;
+  let maxRetries = 3;
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       const response = await axios.get(url);

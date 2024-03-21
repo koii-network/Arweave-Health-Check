@@ -8,11 +8,11 @@ class CoreLogic {
     console.log('********Arweave Webscrapiing started**********');
 
     // console.log('Scraping task called in round', round);
-    const proof_cid = await arweave_task(round);
+    const cid = await arweave_task(round);
 
-    if (proof_cid) {
+    if (cid) {
       await dataDb.intializeData();
-      await dataDb.addProof(round, proof_cid); // store CID in levelDB
+      await dataDb.addProof(round, cid); // store CID in levelDB
       console.log('Node Proof CID stored in round', round);
     } else {
       console.log('CID NOT FOUND');
@@ -20,7 +20,7 @@ class CoreLogic {
 
     console.log('********Arweave Webscrapiing ended**********');
 
-    return proof_cid;
+    return cid;
   }
 
   async fetchSubmission(round) {
@@ -29,10 +29,10 @@ class CoreLogic {
     // console.log('FetchSubmission called in round', round);
 
     await dataDb.intializeData();
-    const proof_cid = await dataDb.getProof(round); // retrieves the cid
-    console.log('Arweave proofs CID', proof_cid, 'in round', round);
+    const cid = await dataDb.getProof(round); // retrieves the cid
+    console.log('Arweave proofs CID', cid, 'in round', round);
 
-    return proof_cid;
+    return cid;
   }
 
   async generateDistributionList(round, _dummyTaskState) {
@@ -219,11 +219,13 @@ class CoreLogic {
       const submission = await this.fetchSubmission(roundNumber);
       console.log('SUBMISSION', submission);
       // submit the submission to the K2
-      await namespaceWrapper.checkSubmissionAndUpdateRound(
-        submission,
-        roundNumber,
-      );
-      console.log('after the submission call');
+      if (submission !== null) {
+        await namespaceWrapper.checkSubmissionAndUpdateRound(
+          submission,
+          roundNumber,
+        );
+        console.log('after the submission call');
+      }
     } catch (error) {
       console.log('error in submission', error);
     }

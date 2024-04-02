@@ -1,19 +1,27 @@
 {
   "author": "Soma",
-  "description": "This task checks health of the nodes on Arweave Network. It fetch all nodes and check their health then upload the total nodes and healthy nodes list to Spheron. Data contains the total nodes, healthy nodes list, and each transactions available nodes. If the transaction shows Not Found, means this transaction is not on arweave.net/_tx_ but can be found on viewblock. The bounty per round is 1000 KOII, which will be divided among users who have made submissions in the last round.",
+  "description": "This task checks health of the nodes on Arweave Network. It fetch all nodes and check their health then upload the total nodes and healthy nodes list to IPFS via Spheron. Data contains the total nodes, healthy nodes list, and each transactions available nodes. If the transaction shows Not Found, means this transaction is not on arweave.net/_tx_ but can be found on viewblock. The bounty per round is 1000 KOII, which will be divided among users who have made submissions in the last round.",
   "repositoryUrl": "https://github.com/koii-network/Arweave-Health-Check",
-  "createdAt": 1710996465615,
-  "migrationDescription": "Release new version of task. Increase the stability and performance of the task. Increase the bounty per round.",
-  "imageUrl": "imageUrl",
+  "createdAt": 1712083450812,
+  "imageUrl": "https://bafybeieuimdnbsfgpy4t2jezr6tuupw6z3ia4gefztl4uyeu2d76mkaiky.ipfs.sphn.link/arweave_task.png",
   "requirementsTags": [
-    {
-      "type": "TASK_VARIABLE",
-      "value": "Spheron_Storage",
-      "description": "used to store the data",
-      "retrievalInfo": "https://faucet-api.koii.network/api/get-spheron-storage-key;GET;SYSTEM_WALLET_PUBLIC_KEY"
-    },
-    { "type": "CPU", "value": "4-core" },
-    { "type": "RAM", "value": "5 GB" },
-    { "type": "STORAGE", "value": "5 GB" }
+  {
+  "type": "TASK_VARIABLE",
+  "value": "Spheron_Storage",
+  "description": "used to store the data",
+  "retrievalInfo": "https://faucet-api.koii.network/api/get-spheron-storage-key;GET;SYSTEM_WALLET_PUBLIC_KEY"
+  },
+  {
+  "type": "CPU",
+  "value": "4-core"
+  },
+  {
+  "type": "RAM",
+  "value": "5 GB"
+  },
+  {
+  "type": "STORAGE",
+  "value": "5 GB"
+  }
   ]
-}
+  }

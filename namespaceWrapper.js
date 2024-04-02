@@ -1,12 +1,23 @@
+/**
+ * namespaceWrapper.js
+ * @description This file contains the namespace wrapper class
+ *             which is used to interact with the namespace
+ *             and the task node
+ * 
+ *             Note: Generally, it is not necessary to modify this file
+ *  
+ * @version 1.0.0
+ */
+
 const { default: axios } = require('axios');
 const { TASK_ID, SECRET_KEY, TASK_NODE_PORT } = require('./init');
 const { Connection, PublicKey, Keypair } = require('@_koi/web3.js');
+const Datastore = require('nedb-promises');
+const {createHash} = require('crypto');
+
 const taskNodeAdministered = !!TASK_ID;
 const BASE_ROOT_URL = `http://localhost:${TASK_NODE_PORT}/namespace-wrapper`;
-const Datastore = require('nedb-promises');
-const fsPromises = require('fs/promises');
-const bs58 = require('bs58');
-const nacl = require('tweetnacl');
+let connection;
 
 class NamespaceWrapper {
   #db;
@@ -20,6 +31,7 @@ class NamespaceWrapper {
       this.initializeDB();
     } else {
       this.#db = Datastore.create('./localKOIIDB.db');
+      this.defaultTaskSetup();
     }
   }
 
@@ -132,8 +144,11 @@ class NamespaceWrapper {
     if (taskNodeAdministered) {
       return await genericHandler('signData', body);
     } else {
-      const msg = new TextEncoder().encode(JSON.stringify(data));
-      const signedMessage = nacl.sign(msg, this.mainSystemAccount.secretKey);
+      const msg = new TextEncoder().encode(JSON.stringify(body));
+      const signedMessage = nacl.sign(
+        msg,
+        this.#testingMainSystemAccount.secretKey,
+      );
       return await this.bs58Encode(signedMessage);
     }
   }
@@ -142,6 +157,14 @@ class NamespaceWrapper {
     return bs58.encode(
       Buffer.from(data.buffer, data.byteOffset, data.byteLength),
     );
+  }
+
+  async bs58Decode(data) {
+    return new Uint8Array(bs58.decode(data));
+  }
+
+  decodePayload(payload) {
+    return new TextDecoder().decode(payload);
   }
 
   /**
@@ -155,8 +178,8 @@ class NamespaceWrapper {
     } else {
       try {
         const payload = nacl.sign.open(
-          await this.bs58Decode(signedData),
-          await this.bs58Decode(publicKey),
+          await this.bs58Decode(signedMessage),
+          await this.bs58Decode(pubKey),
         );
         if (!payload) return { error: 'Invalid signature' };
         return { data: this.decodePayload(payload) };
@@ -275,13 +298,52 @@ class NamespaceWrapper {
     }
   }
 
+  async logMessage(level, message) {
+    switch (level) {
+      case LogLevel.Log:
+        console.log(message);
+        break;
+      case LogLevel.Warn:
+        console.warn(message);
+        break;
+      case LogLevel.Error:
+        console.error(message);
+        break;
+      default:
+        console.log(
+          `Invalid log level: ${level}. The log levels can be log, warn or error`,
+        );
+        return false;
+    }
+    return true;
+  }
+
+  /**
+   * This logger function is used to log the task erros , warnings and logs on desktop-node
+   * @param {level} enum // Receive method ["Log", "Warn", "Error"]
+   enum LogLevel {
+   Log = 'log',
+   Warn = 'warn',
+   Error = 'error',
+   }
+   * @param {message} string // log, error or warning message
+   * @returns {boolean} // true if the message is logged successfully otherwise false
+   */
+
+  async logger(level, message) {
+    if (taskNodeAdministered) {
+      return await genericHandler('logger', level, message);
+    } else {
+      return await this.logMessage(level, message);
+    }
+  }
+
   async auditSubmission(candidatePubkey, isValid, voterKeypair, round) {
     if (taskNodeAdministered) {
       return await genericHandler(
         'auditSubmission',
         candidatePubkey,
         isValid,
-        voterKeypair,
         round,
       );
     } else {
@@ -363,9 +425,9 @@ class NamespaceWrapper {
     }
   }
 
-  async payoutTrigger() {
+  async payoutTrigger(round) {
     if (taskNodeAdministered) {
-      return await genericHandler('payloadTrigger');
+      return await genericHandler('payloadTrigger', round);
     } else {
       console.log(
         'Payout Trigger only handles possitive flows (Without audits)',
@@ -446,6 +508,7 @@ class NamespaceWrapper {
     if (taskNodeAdministered) {
       return await genericHandler('defaultTaskSetup');
     } else {
+      if (this.#testingTaskState) return;
       this.#testingMainSystemAccount = new Keypair();
       this.#testingStakingSystemAccount = new Keypair();
       this.#testingDistributionList = {};
@@ -515,51 +578,41 @@ class NamespaceWrapper {
     const taskAccountDataJSON = await this.getTaskState();
 
     console.log(
-      'Fetching the submissions of N - 1 round',
+      `Fetching the submissions of round ${round}`,
       taskAccountDataJSON.submissions[round],
     );
     const submissions = taskAccountDataJSON.submissions[round];
     if (submissions == null) {
-      console.log('No submisssions found in N-1 round');
-      return 'No submisssions found in N-1 round';
+      console.log(`No submisssions found in round ${round}`);
+      return `No submisssions found in round ${round}`;
     } else {
       const keys = Object.keys(submissions);
       const values = Object.values(submissions);
       const size = values.length;
-      const numberOfChecks = Math.min(5, size);
-
-      let uniqueIndices = new Set();
-
-      // Populate uniqueIndices with unique random numbers
-      while (uniqueIndices.size < numberOfChecks) {
-        const randomIndex = Math.floor(Math.random() * size);
-        uniqueIndices.add(randomIndex);
-      }
-
-      // console.log('Submissions from last round: ', keys, values, size);
+      console.log('Submissions from last round: ', keys, values, size);
       let isValid;
       const submitterAccountKeyPair = await this.getSubmitterAccount();
       const submitterPubkey = submitterAccountKeyPair.publicKey.toBase58();
-      for (let index of uniqueIndices) {
-        let candidatePublicKey = keys[index];
-        // console.log('FOR CANDIDATE KEY', candidatePublicKey);
-        let candidateKeyPairPublicKey = new PublicKey(keys[index]);
+      for (let i = 0; i < size; i++) {
+        let candidatePublicKey = keys[i];
+        console.log('FOR CANDIDATE KEY', candidatePublicKey);
+        let candidateKeyPairPublicKey = new PublicKey(keys[i]);
         if (candidatePublicKey == submitterPubkey) {
           console.log('YOU CANNOT VOTE ON YOUR OWN SUBMISSIONS');
         } else {
           try {
             console.log(
               'SUBMISSION VALUE TO CHECK',
-              values[index].submission_value,
+              values[i].submission_value,
             );
-            isValid = await validate(values[index].submission_value, round);
+            isValid = await validate(values[i].submission_value, round);
             console.log(`Voting ${isValid} to ${candidatePublicKey}`);
 
             if (isValid) {
               // check for the submissions_audit_trigger , if it exists then vote true on that otherwise do nothing
               const submissions_audit_trigger =
                 taskAccountDataJSON.submissions_audit_trigger[round];
-              // console.log('SUBMIT AUDIT TRIGGER', submissions_audit_trigger);
+              console.log('SUBMIT AUDIT TRIGGER', submissions_audit_trigger);
               // console.log(
               //   "CANDIDATE PUBKEY CHECK IN AUDIT TRIGGER",
               //   submissions_audit_trigger[candidatePublicKey]
@@ -600,25 +653,25 @@ class NamespaceWrapper {
     // await this.checkVoteStatus();
     console.log('******/  IN VOTING OF DISTRIBUTION LIST /******');
     const taskAccountDataJSON = await this.getTaskState();
-    // console.log(
-    //   'Fetching the Distribution submissions of N - 2 round',
-    //   taskAccountDataJSON.distribution_rewards_submission[round],
-    // );
+    console.log(
+      `Fetching the Distribution submissions of round ${round}`,
+      taskAccountDataJSON.distribution_rewards_submission[round],
+    );
     const submissions =
       taskAccountDataJSON.distribution_rewards_submission[round];
     if (submissions == null) {
-      console.log('No submisssions found in N-2 round');
-      return 'No submisssions found in N-2 round';
+      console.log(`No submisssions found in round ${round}`);
+      return `No submisssions found in round ${round}`;
     } else {
       const keys = Object.keys(submissions);
       const values = Object.values(submissions);
       const size = values.length;
-      // console.log(
-      //   'Distribution Submissions from last round: ',
-      //   keys,
-      //   values,
-      //   size,
-      // );
+      console.log(
+        'Distribution Submissions from last round: ',
+        keys,
+        values,
+        size,
+      );
       let isValid;
       const submitterAccountKeyPair = await this.getSubmitterAccount();
       const submitterPubkey = submitterAccountKeyPair.publicKey.toBase58();
@@ -705,9 +758,199 @@ class NamespaceWrapper {
       );
       return basePath;
     } else {
-      return '.';
+      return './';
     }
+  }
 
+  async getAverageSlotTime() {
+    if (taskNodeAdministered) {
+      try {
+        const current_rpc = await namespaceWrapper.getRpcUrl();
+         const current_connection = new Connection(current_rpc);
+        const slotSamples = await current_connection.getRecentPerformanceSamples(60);
+        let samplesLength = slotSamples.length;
+
+        const averageSlotTime =
+          slotSamples.reduce((avgSlotTime, slotSample) => {
+            return (
+              avgSlotTime +
+              1000 * (slotSample.samplePeriodSecs / slotSample.numSlots)
+            );
+          }, 0) / samplesLength;
+        return averageSlotTime;
+      } catch (error) {
+        console.error('Error getting average slot time', error);
+        return null;
+      }
+    } else {
+      return 400;
+    }
+  }
+
+  async nodeSelectionDistributionList(round, isPreviousFailed) {
+    const taskAccountDataJSON = await namespaceWrapper.getTaskState();
+    console.log('EXPECTED ROUND', round);
+
+    const submissions = taskAccountDataJSON.submissions[round];
+    if (submissions == null) {
+      console.log('No submisssions found in N-1 round');
+      return 'No submisssions found in N-1 round';
+    } else {
+      const values = Object.values(submissions);
+      console.log('VALUES', values);
+      const keys = Object.keys(submissions);
+      console.log('KEYS', keys);
+      let size = values.length;
+      console.log('Submissions from N-2  round: ', keys, values, size);
+
+      // Check the keys i.e if the submitter shall be excluded or not
+
+      const audit_record = taskAccountDataJSON.distributions_audit_record;
+      console.log('AUDIT RECORD');
+      console.log('ROUND DATA', audit_record[round]);
+
+      if (audit_record[round] == 'PayoutFailed') {
+        console.log(
+          'SUBMITTER LIST',
+          taskAccountDataJSON.distribution_rewards_submission[round],
+        );
+        const submitterList =
+          taskAccountDataJSON.distribution_rewards_submission[round];
+        const submitterSize = Object.keys(submitterList).length;
+        console.log('SUBMITTER SIZE', submitterSize);
+        const submitterKeys = Object.keys(submitterList);
+        console.log('SUBMITTER KEYS', submitterKeys);
+
+        for (let j = 0; j < submitterSize; j++) {
+          console.log('SUBMITTER KEY CANDIDATE', submitterKeys[j]);
+          const id = keys.indexOf(submitterKeys[j]);
+          console.log('ID', id);
+          keys.splice(id, 1);
+          values.splice(id, 1);
+          size--;
+        }
+
+        console.log('KEYS', keys);
+      }
+
+      // calculating the digest
+
+      const ValuesString = JSON.stringify(values);
+
+      const hashDigest = createHash('sha256')
+        .update(ValuesString)
+        .digest('hex');
+
+      console.log('HASH DIGEST', hashDigest);
+
+      // function to calculate the score
+      const calculateScore = (str = '') => {
+        return str.split('').reduce((acc, val) => {
+          return acc + val.charCodeAt(0);
+        }, 0);
+      };
+
+      // function to compare the ASCII values
+
+      const compareASCII = (str1, str2) => {
+        const firstScore = calculateScore(str1);
+        const secondScore = calculateScore(str2);
+        return Math.abs(firstScore - secondScore);
+      };
+
+      // loop through the keys and select the one with higest score
+
+      const selectedNode = {
+        score: 0,
+        pubkey: '',
+      };
+      let score = 0;
+      if (isPreviousFailed) {
+        let leastScore = -Infinity;
+        let secondLeastScore = -Infinity;
+        for (let i = 0; i < size; i++) {
+          const candidateSubmissionJson = {};
+          candidateSubmissionJson[keys[i]] = values[i];
+          const candidateSubmissionString = JSON.stringify(
+            candidateSubmissionJson,
+          );
+          const candidateSubmissionHash = createHash('sha256')
+            .update(candidateSubmissionString)
+            .digest('hex');
+          const candidateScore = compareASCII(
+            hashDigest,
+            candidateSubmissionHash,
+          );
+          if (candidateScore > leastScore) {
+            secondLeastScore = leastScore;
+            leastScore = candidateScore;
+          } else if (candidateScore > secondLeastScore) {
+            secondLeastScore = candidateScore;
+            selectedNode.score = candidateScore;
+            selectedNode.pubkey = keys[i];
+          }
+        }
+      } else {
+        for (let i = 0; i < size; i++) {
+          const candidateSubmissionJson = {};
+          candidateSubmissionJson[keys[i]] = values[i];
+          const candidateSubmissionString = JSON.stringify(
+            candidateSubmissionJson,
+          );
+          const candidateSubmissionHash = createHash('sha256')
+            .update(candidateSubmissionString)
+            .digest('hex');
+          const candidateScore = compareASCII(
+            hashDigest,
+            candidateSubmissionHash,
+          );
+          console.log('CANDIDATE SCORE', candidateScore);
+          if (candidateScore > score) {
+            score = candidateScore;
+            selectedNode.score = candidateScore;
+            selectedNode.pubkey = keys[i];
+          }
+        }
+      }
+
+      console.log('SELECTED NODE OBJECT', selectedNode);
+      return selectedNode.pubkey;
+    }
+  }
+
+  async selectAndGenerateDistributionList(submitDistributionList, round, isPreviousRoundFailed) {
+    console.log('SelectAndGenerateDistributionList called');
+    const selectedNode = await this.nodeSelectionDistributionList(
+      round,
+      isPreviousRoundFailed,
+    );
+    console.log('Selected Node', selectedNode);
+    const submitPubKey = await this.getSubmitterAccount();
+    if (selectedNode == undefined || submitPubKey == undefined) return;
+    if (selectedNode == submitPubKey?.publicKey.toBase58()) {
+      await submitDistributionList(round);
+      const taskState = await this.getTaskState();
+      if (taskState == null) {
+        console.error('Task state not found');
+        return;
+      }
+      const avgSlotTime = await this.getAverageSlotTime();
+      if (avgSlotTime == null) {
+        console.error('Avg slot time not found');
+        return;
+      }
+      setTimeout(async () => {
+        await this.payoutTrigger(round);
+      }, (taskState.audit_window + taskState.submission_window) * avgSlotTime);
+    }
+  }
+
+  getMainAccountPubkey() {
+    if (taskNodeAdministered) {
+      return MAIN_ACCOUNT_PUBKEY;
+    } else {
+      return this.#testingMainSystemAccount.publicKey.toBase58();
+    }
   }
 }
 
@@ -729,7 +972,7 @@ async function genericHandler(...args) {
     return { error: err };
   }
 }
-let connection;
+
 const namespaceWrapper = new NamespaceWrapper();
 if (taskNodeAdministered) {
   namespaceWrapper.getRpcUrl().then(rpcUrl => {

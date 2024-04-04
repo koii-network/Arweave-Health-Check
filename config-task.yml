@@ -51,7 +51,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: '4MqVpN6XyAyC9GqQ8AZeDci55pEHEa98cb2LHvzVxnEV'
+task_id: 'FPFscFsaCYtpYvm82L3cSvJ8G3SiRiPAXRN2mXhaHYGA'
 
 # Provide the description for changes made in new version of task
 migrationDescription: 'Release new version of task. Increase the stability and performance of the task.'

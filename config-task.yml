@@ -23,9 +23,9 @@ minimum_stake_amount: 1.9
 
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
-total_bounty_amount: 100
+total_bounty_amount: 100000
 
-bounty_amount_per_round: 10
+bounty_amount_per_round: 1000
 
 #Number of times allowed to re-submit the distribution list in case the distribution list is audited
 allowed_failed_distributions: 3
@@ -51,7 +51,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: '2CLorjxyYXyjNAg2853j5FuidXKAC8YjCi2aWcinErBa'
+task_id: 'FPFscFsaCYtpYvm82L3cSvJ8G3SiRiPAXRN2mXhaHYGA'
 
 # Provide the description for changes made in new version of task
 migrationDescription: 'Release new version of task. Increase the stability and performance of the task.'

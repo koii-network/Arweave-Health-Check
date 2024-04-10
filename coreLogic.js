@@ -254,11 +254,13 @@ class CoreLogic {
     );
   }
 
-  async auditDistribution(roundNumber) {
+  async auditDistribution(roundNumber, isPreviousRoundFailed) {
     console.log('auditDistribution called with round', roundNumber);
     await namespaceWrapper.validateAndVoteOnDistributionList(
       this.validateDistribution,
       roundNumber,
+      isPreviousRoundFailed
+
     );
   }
 }

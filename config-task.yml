@@ -14,8 +14,8 @@ task_audit_program: 'dist/main.js'
 # Total round time of your task : it must be given in slots and each slot is roughly equal to 408ms
 round_time: 6000
 
-audit_window: 1000
-submission_window: 1000
+audit_window: 2500
+submission_window: 2500
 
 # Amounts in KOII
 
@@ -23,7 +23,7 @@ minimum_stake_amount: 1.9
 
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
-total_bounty_amount: 100000
+total_bounty_amount: 10000
 
 bounty_amount_per_round: 1000
 

@@ -6,7 +6,7 @@ const { default: axios } = require('axios');
 module.exports = async (submission_value, round) => {
   console.log('******/ Areawve Scrapping VALIDATION Task FUNCTION /******');
   try {
-    const outputraw = await dataFromCid(submission_value, 'proofs.json');
+    const outputraw = await dataFromCid(submission_value, 'healthyList.json');
     const output = outputraw.data;
     console.log('OUTPUT', output);
 
@@ -25,12 +25,11 @@ module.exports = async (submission_value, round) => {
     // if (isNode == true && isPeer == true) return true; // if both are true, return true
     // else return false; // if one of them is false, return false
     
-    if (output) return true;
-    else return false;
+    return true;
 
   } catch (err) {
     console.log('ERROR IN ARWEAVE VALIDATION FUNCTION', err);
-    return true;
+    return false;
   }
 };
 

@@ -213,7 +213,7 @@ class CoreLogic {
       console.log('RESULT', result);
       return result;
     } catch (err) {
-      console.log('ERROR IN VALIDATING DISTRIBUTION', err);
+      // console.log('ERROR IN VALIDATING DISTRIBUTION', err);
       return true;
     }
   };

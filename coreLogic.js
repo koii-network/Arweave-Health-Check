@@ -78,7 +78,7 @@ class CoreLogic {
               // to do so we need to fetch the stakes of the candidate from the task state
               const stake_list = taskAccountDataJSON.stake_list;
               const candidateStake = stake_list[candidatePublicKey];
-              const slashedStake = candidateStake * 0.7;
+              const slashedStake = Math.floor(candidateStake * 0.7);
               distributionList[candidatePublicKey] = -slashedStake;
               console.log('Candidate Stake', candidateStake);
             } else {
@@ -94,7 +94,7 @@ class CoreLogic {
                 // to do so we need to fetch the stakes of the candidate from the task state
                 const stake_list = taskAccountDataJSON.stake_list;
                 const candidateStake = stake_list[candidatePublicKey];
-                const slashedStake = candidateStake * 0.7;
+                const slashedStake = Math.floor(candidateStake * 0.7);
                 distributionList[candidatePublicKey] = -slashedStake;
                 console.log('Candidate Stake', candidateStake);
               }
@@ -213,7 +213,7 @@ class CoreLogic {
       console.log('RESULT', result);
       return result;
     } catch (err) {
-      console.log('ERROR IN VALIDATING DISTRIBUTION', err);
+      // console.log('ERROR IN VALIDATING DISTRIBUTION', err);
       return true;
     }
   };

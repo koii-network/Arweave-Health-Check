@@ -13,7 +13,7 @@ router.use((req, res, next) => {
 
 // Route to get task state
 router.get('/taskState', async (req, res) => {
-  const state = await namespaceWrapper.getTaskState();
+  const state = await namespaceWrapper.getTaskState({});
   console.log('TASK STATE', state);
 
   res.status(200).json({ taskState: state });

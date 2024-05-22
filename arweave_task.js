@@ -4,10 +4,8 @@ const { namespaceWrapper } = require('./namespaceWrapper');
 const nacl = require('tweetnacl');
 const bs58 = require('bs58');
 const dataDb = require('./helpers/db');
-const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
-const storageClient = new SpheronClient({
-  token: process.env.Spheron_Storage,
-});
+const KoiiStorageClient = require('@_koii/storage-task-sdk');
+const storageClient = new KoiiStorageClient.default();
 const fs = require('fs');
 const { getRandomTransactionId } = require('./helpers/randomTx');
 
@@ -70,18 +68,8 @@ uploadIPFS = async function (data, round) {
         // const basePath = await namespaceWrapper.getBasePath();
         // let file = await getFilesFromPath(`${basePath}/${path}`);
         // console.log(`${basePath}/${proofPath}`);
-        let spheronData = await storageClient.upload(
+        let spheronData = await storageClient.uploadFile(
           `${basePath}/${proofPath}`,
-          {
-            protocol: ProtocolEnum.IPFS,
-            name: 'taskData',
-            onUploadInitiated: uploadId => {
-              // console.log(`Upload with id ${uploadId} started...`);
-            },
-            onChunkUploaded: (uploadedSize, totalSize) => {
-              // console.log(`Uploaded ${uploadedSize} of ${totalSize} Bytes.`);
-            },
-          },
         );
         proof_cid = spheronData.cid;
 

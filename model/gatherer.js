@@ -14,9 +14,8 @@ const Peer = require('../adapters/arweave/peer');
 // const { Web3Storage, getFilesFromPath, File } = require('web3.storage');
 const { getRandomTransactionId } = require('../helpers/randomTx');
 const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
-const storageClient = new SpheronClient({
-  token: process.env.Spheron_Storage,
-});
+const KoiiStorageClient = require('@_koii/storage-task-sdk');
+const storageClient = new KoiiStorageClient.default(undefined, undefined, true);
 const { Queue } = require('async-await-queue');
 const { namespaceWrapper } = require('../namespaceWrapper');
 const fs = require('fs');
@@ -250,20 +249,13 @@ class Gatherer {
           try {
             let cid;
             console.log(`${basePath}/${path}`);
-            let spheronData = await storageClient.upload(
-              `${basePath}/${path}`,
-              {
-                protocol: ProtocolEnum.IPFS,
-                name: 'taskData',
-                onUploadInitiated: uploadId => {
-                  // console.log(`Upload with id ${uploadId} started...`);
-                },
-                onChunkUploaded: (uploadedSize, totalSize) => {
-                  // console.log(`Uploaded ${uploadedSize} of ${totalSize} Bytes.`);
-                },
-              },
-            );
-            cid = spheronData.cid;
+            const client = new KoiiStorageClient.default(undefined, undefined, true);
+            const userStaking = await namespaceWrapper.getSubmitterAccount();
+            console.log(`Uploading ${basePath}/${path}`);
+            const fileUploadResponse = await client.uploadFile(`${basePath}/${path}`,userStaking);
+            console.log(`Uploaded ${basePath}/${path}`);
+      
+            cid = fileUploadResponse.cid;
 
             console.log(`CID: ${cid}`);
             console.log('Arweave healthy list to IPFS: ', cid);

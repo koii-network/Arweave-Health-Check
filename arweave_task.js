@@ -5,7 +5,8 @@ const nacl = require('tweetnacl');
 const bs58 = require('bs58');
 const dataDb = require('./helpers/db');
 const KoiiStorageClient = require('@_koii/storage-task-sdk');
-const storageClient = new KoiiStorageClient.default();
+const client = new KoiiStorageClient.default(undefined, undefined, true);
+
 const fs = require('fs');
 const { getRandomTransactionId } = require('./helpers/randomTx');
 
@@ -68,10 +69,11 @@ uploadIPFS = async function (data, round) {
         // const basePath = await namespaceWrapper.getBasePath();
         // let file = await getFilesFromPath(`${basePath}/${path}`);
         // console.log(`${basePath}/${proofPath}`);
-        let spheronData = await storageClient.uploadFile(
-          `${basePath}/${proofPath}`,
-        );
-        proof_cid = spheronData.cid;
+        const userStaking = await namespaceWrapper.getSubmitterAccount();
+        console.log(`Uploading ${basePath}/${proofPath}`);
+        const fileUploadResponse = await client.uploadFile(`${basePath}/${proofPath}`,userStaking);
+        console.log(`Uploaded ${basePath}/${proofPath}`);
+        proof_cid = fileUploadResponse.cid;
 
         // console.log(`CID: ${proof_cid}`);
         console.log('Arweave healthy list to IPFS: ', proof_cid);

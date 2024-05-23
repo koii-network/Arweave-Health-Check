@@ -101,7 +101,7 @@ uploadIPFS = async function (data, round) {
       break;
     }
   } else {
-    console.log('NODE DO NOT HAVE ACCESS TO Spheron');
+    console.log('NODE DO NOT HAVE ACCESS TO KOII STORAGE');
   }
 };
 

@@ -13,7 +13,6 @@ require('dotenv').config();
 const Peer = require('../adapters/arweave/peer');
 // const { Web3Storage, getFilesFromPath, File } = require('web3.storage');
 const { getRandomTransactionId } = require('../helpers/randomTx');
-const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
 const KoiiStorageClient = require('@_koii/storage-task-sdk');
 const storageClient = new KoiiStorageClient.default(undefined, undefined, true);
 const { Queue } = require('async-await-queue');
@@ -277,7 +276,7 @@ class Gatherer {
           break;
         }
       } else {
-        console.log('NODE DO NOT HAVE ACCESS TO SPHERON STORAGE');
+        console.log('NODE DO NOT HAVE ACCESS TO KOII STORAGE SDK');
       }
     } catch (err) {
       console.log(err);

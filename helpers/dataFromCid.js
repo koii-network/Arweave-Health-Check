@@ -2,11 +2,17 @@ const axios = require('axios');
 
 module.exports = async (cid, fileName, maxRetries = 4, retryDelay = 3000) => {
   const urllist = [
-    `https://${cid}.ipfs.sphn.link/${fileName}`,
     `https://${cid}.ipfs.4everland.io/${fileName}`,
     `https://cloudflare-ipfs.com/ipfs/${cid}/${fileName}`,
     `https://${cid}.ipfs.dweb.link/${fileName}`,
   ];
+  const client = new KoiiStorageClient.default(undefined, undefined, true);
+  try {
+    const data = await client.getFile(cid, fileName);
+    return data;
+  } catch (error) {
+    console.log(`Error fetching file from Koii IPFS: ${error.message}`);
+  }
   console.log(urllist);
   for (const url of urllist) {
     console.log(`Trying URL: ${url}`);

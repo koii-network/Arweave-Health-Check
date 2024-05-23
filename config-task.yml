@@ -37,10 +37,6 @@ space: 5
 # To add more global variables and task variables, please refer the type,value,description format shown below
 
 requirementsTags:
-  - type: TASK_VARIABLE
-    value: "Spheron_Storage"
-    description: "used to store the data"
-    retrievalInfo: "https://faucet-api.koii.network/api/get-spheron-storage-key;GET;SYSTEM_WALLET_PUBLIC_KEY"
   - type: CPU
     value: '4-core'
   - type: RAM

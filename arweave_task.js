@@ -4,10 +4,9 @@ const { namespaceWrapper } = require('./namespaceWrapper');
 const nacl = require('tweetnacl');
 const bs58 = require('bs58');
 const dataDb = require('./helpers/db');
-const { SpheronClient, ProtocolEnum } = require('@spheron/storage');
-const storageClient = new SpheronClient({
-  token: process.env.Spheron_Storage,
-});
+const KoiiStorageClient = require('@_koii/storage-task-sdk');
+const client = new KoiiStorageClient.default(undefined, undefined, true);
+
 const fs = require('fs');
 const { getRandomTransactionId } = require('./helpers/randomTx');
 
@@ -70,20 +69,11 @@ uploadIPFS = async function (data, round) {
         // const basePath = await namespaceWrapper.getBasePath();
         // let file = await getFilesFromPath(`${basePath}/${path}`);
         // console.log(`${basePath}/${proofPath}`);
-        let spheronData = await storageClient.upload(
-          `${basePath}/${proofPath}`,
-          {
-            protocol: ProtocolEnum.IPFS,
-            name: 'taskData',
-            onUploadInitiated: uploadId => {
-              // console.log(`Upload with id ${uploadId} started...`);
-            },
-            onChunkUploaded: (uploadedSize, totalSize) => {
-              // console.log(`Uploaded ${uploadedSize} of ${totalSize} Bytes.`);
-            },
-          },
-        );
-        proof_cid = spheronData.cid;
+        const userStaking = await namespaceWrapper.getSubmitterAccount();
+        console.log(`Uploading ${basePath}/${proofPath}`);
+        const fileUploadResponse = await client.uploadFile(`${basePath}/${proofPath}`,userStaking);
+        console.log(`Uploaded ${basePath}/${proofPath}`);
+        proof_cid = fileUploadResponse.cid;
 
         // console.log(`CID: ${proof_cid}`);
         console.log('Arweave healthy list to IPFS: ', proof_cid);
@@ -111,7 +101,7 @@ uploadIPFS = async function (data, round) {
       break;
     }
   } else {
-    console.log('NODE DO NOT HAVE ACCESS TO Spheron');
+    console.log('NODE DO NOT HAVE ACCESS TO KOII STORAGE');
   }
 };
 

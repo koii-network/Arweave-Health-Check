@@ -253,8 +253,12 @@ class Gatherer {
             console.log(`Uploading ${basePath}/${path}`);
             const fileUploadResponse = await client.uploadFile(`${basePath}/${path}`,userStaking);
             console.log(`Uploaded ${basePath}/${path}`);
-      
-            cid = fileUploadResponse.cid;
+            try{
+              cid = fileUploadResponse.cid;
+            }catch(err){
+              cid = null;
+              console.log('error getting CID', err);
+            }
 
             console.log(`CID: ${cid}`);
             console.log('Arweave healthy list to IPFS: ', cid);

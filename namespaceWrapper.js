@@ -702,7 +702,7 @@ class NamespaceWrapper {
     }
   }
 
-  async validateAndVoteOnDistributionList(validateDistribution, round) {
+  async validateAndVoteOnDistributionList(validateDistribution, round, isPreviousRoundFailed=false) {
     // await this.checkVoteStatus();
     console.log('******/  IN VOTING OF DISTRIBUTION LIST /******');
     let taskAccountDataJSON = null;

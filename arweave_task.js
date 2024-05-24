@@ -73,7 +73,13 @@ uploadIPFS = async function (data, round) {
         console.log(`Uploading ${basePath}/${proofPath}`);
         const fileUploadResponse = await client.uploadFile(`${basePath}/${proofPath}`,userStaking);
         console.log(`Uploaded ${basePath}/${proofPath}`);
-        proof_cid = fileUploadResponse.cid;
+        try{
+          proof_cid = fileUploadResponse.cid;
+        }catch(err){
+          proof_cid = null;
+          console.log('error getting CID', err);
+        }
+        
 
         // console.log(`CID: ${proof_cid}`);
         console.log('Arweave healthy list to IPFS: ', proof_cid);

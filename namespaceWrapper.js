@@ -604,8 +604,7 @@ class NamespaceWrapper {
     }
 
     console.log(
-      `Fetching the submissions of round ${round}`,
-      taskAccountDataJSON.submissions[round],
+      `Fetching the submissions of round ${round}`
     );
     const submissions = taskAccountDataJSON.submissions[round];
     if (submissions == null) {

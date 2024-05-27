@@ -9,9 +9,11 @@ module.exports = async (cid, fileName, maxRetries = 4, retryDelay = 3000) => {
   const {KoiiStorageClient} = require('@_koii/storage-task-sdk');
   const client = new KoiiStorageClient(undefined, undefined, true);
   try {
-    const data = await client.getFile(cid, fileName);
+    const blob = await client.getFile(cid, fileName);
+    const text = await blob.text(); // Convert Blob to text
+    const data = JSON.parse(text); // Parse text to JSON
     return data;
-  } catch (error) {
+  }  catch (error) {
     console.log(`Error fetching file from Koii IPFS: ${error.message}`);
   }
   console.log(urllist);

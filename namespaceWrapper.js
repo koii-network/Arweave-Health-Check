@@ -1083,9 +1083,16 @@ async function genericHandler(...args) {
       return null;
     }
   } catch (err) {
-    console.error(`Error in genericHandler: "${args[0]}"`, err.message);
-    console.error(err?.response?.data);
-    return { error: err };
+    const responseData = err?.response?.data?.message;
+    if ((args[0] === 'getTaskSubmissionInfo' || args[0] === 'getTaskDistributionInfo') && 
+    responseData && typeof responseData === 'string' && responseData.includes('Task does not have any')) {
+      console.log(`Error in genericHandler: "${args[0]}"`, err.message);
+      console.log(err?.response?.data);
+    }else{
+      console.error(`Error in genericHandler: "${args[0]}"`, err.message);
+      console.error(err?.response?.data);
+      return { error: err };
+    }
   }
 }
 

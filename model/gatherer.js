@@ -13,8 +13,8 @@ require('dotenv').config();
 const Peer = require('../adapters/arweave/peer');
 // const { Web3Storage, getFilesFromPath, File } = require('web3.storage');
 const { getRandomTransactionId } = require('../helpers/randomTx');
-const KoiiStorageClient = require('@_koii/storage-task-sdk');
-const storageClient = new KoiiStorageClient.default(undefined, undefined, true);
+const {KoiiStorageClient} = require('@_koii/storage-task-sdk');
+const storageClient = new KoiiStorageClient(undefined, undefined, true);
 const { Queue } = require('async-await-queue');
 const { namespaceWrapper } = require('../namespaceWrapper');
 const fs = require('fs');
@@ -248,7 +248,7 @@ class Gatherer {
           try {
             let cid;
             console.log(`${basePath}/${path}`);
-            const client = new KoiiStorageClient.default(undefined, undefined, true);
+            const client = new KoiiStorageClient(undefined, undefined, true);
             const userStaking = await namespaceWrapper.getSubmitterAccount();
             console.log(`Uploading ${basePath}/${path}`);
             const fileUploadResponse = await client.uploadFile(`${basePath}/${path}`,userStaking);

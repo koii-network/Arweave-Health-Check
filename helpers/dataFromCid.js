@@ -6,7 +6,8 @@ module.exports = async (cid, fileName, maxRetries = 4, retryDelay = 3000) => {
     `https://cloudflare-ipfs.com/ipfs/${cid}/${fileName}`,
     `https://${cid}.ipfs.dweb.link/${fileName}`,
   ];
-  const client = new KoiiStorageClient.default(undefined, undefined, true);
+  const {KoiiStorageClient} = require('@_koii/storage-task-sdk');
+  const client = new KoiiStorageClient(undefined, undefined, true);
   try {
     const data = await client.getFile(cid, fileName);
     return data;

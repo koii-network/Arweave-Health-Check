@@ -751,25 +751,14 @@ class NamespaceWrapper {
         console.log('FOR CANDIDATE KEY', candidatePublicKey);
         let candidateKeyPairPublicKey = new PublicKey(keys[i]);
           try {
-            console.log(
-              'DISTRIBUTION SUBMISSION VALUE TO CHECK',
+            // console.log(
+            //   'DISTRIBUTION SUBMISSION VALUE TO CHECK',
+            //   values[i].submission_value,
+            // );
+            isValid = await validateDistribution(
               values[i].submission_value,
-            );
-            if(selectedNode != candidatePublicKey) {
-              console.log(
-                `${candidatePublicKey} IS NOT A SELECTED NODE FOR DISTRIBUTION ROUND ${round}`,
+              round,
               );
-              isValid = false;
-            }
-            else {
-                isValid = await validateDistribution(
-                values[i].submission_value,
-                round,
-                );
-            }
-
-            console.log(`Voting ${isValid} to ${candidatePublicKey}`);
-
             if (isValid) {
               // check for the submissions_audit_trigger , if it exists then vote true on that otherwise do nothing
               const distributions_audit_trigger =

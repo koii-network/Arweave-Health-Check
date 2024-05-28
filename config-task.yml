@@ -1,7 +1,7 @@
 # Name and metadata of your task
 task_name: 'Arweave Verifier'
 author: 'Soma'
-description: 'This task checks health of the nodes on Arweave Network. It fetch all nodes and check their health then upload the total nodes and healthy nodes list to IPFS via Spheron. Data contains the total nodes, healthy nodes list, and each transactions available nodes. If the transaction shows Not Found, means this transaction is not on arweave.net/_tx_ but can be found on viewblock. The bounty per round is 1000 KOII, which will be divided among users who have made submissions in the last round.'
+description: 'This task checks health of the nodes on Arweave Network. It fetch all nodes and check their health then upload the total nodes and healthy nodes list to IPFS. Data contains the total nodes, healthy nodes list, and each transactions available nodes. If the transaction shows Not Found, means this transaction is not on arweave.net/_tx_ but can be found on viewblock. The bounty per round is 2000 KOII, which will be divided among users who have made submissions in the last round.'
 repositoryUrl: 'https://github.com/koii-network/Arweave-Health-Check'
 imageUrl: 'https://bafybeieuimdnbsfgpy4t2jezr6tuupw6z3ia4gefztl4uyeu2d76mkaiky.ipfs.w3s.link/arweave_task.png'
 
@@ -25,7 +25,7 @@ minimum_stake_amount: 1.9
 # total bounty is not accepted in case of update task
 total_bounty_amount: 10000
 
-bounty_amount_per_round: 1000
+bounty_amount_per_round: 2000
 
 #Number of times allowed to re-submit the distribution list in case the distribution list is audited
 allowed_failed_distributions: 3
@@ -47,7 +47,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'E16L6VQYotjZFDVQzLsTka9iKyBpRF43jQu5fU79S5f1'
+task_id: '6iRsCfmqdi7StUGCkbvZXwdxwmAd6txPwupAE76yF67F'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Release new version of task. Fix the distribution issue.'
+migrationDescription: 'Removed Spheron Usage.'

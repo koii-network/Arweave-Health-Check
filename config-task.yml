@@ -47,7 +47,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: '6iRsCfmqdi7StUGCkbvZXwdxwmAd6txPwupAE76yF67F'
+task_id: 'AXMcu7LACi5xtc1hLxRAoDDAnjtFsF43sSUBQ3MZcfbe'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Removed Spheron Usage.'
+migrationDescription: 'Update Arweave Task.'

@@ -1003,7 +1003,7 @@ class NamespaceWrapper {
             hashDigest,
             candidateSubmissionHash,
           );
-          console.log('CANDIDATE SCORE', candidateScore);
+          // console.log('CANDIDATE SCORE', candidateScore);
           if (candidateScore > score) {
             score = candidateScore;
             selectedNode.score = candidateScore;

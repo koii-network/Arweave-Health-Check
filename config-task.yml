@@ -47,7 +47,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'AXMcu7LACi5xtc1hLxRAoDDAnjtFsF43sSUBQ3MZcfbe'
+task_id: 'HntrLuBBxWdYmY4pepb2CvdxSyPMmhoepEwqkWsmnNsh'
 
 # Provide the description for changes made in new version of task
 migrationDescription: 'Update Arweave Task.'

@@ -1,6 +1,21 @@
 const axios = require('axios');
+const { CID } = require('multiformats/cid');
+
+function isValidCID(cid) {
+  try {
+    CID.parse(cid);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
 
 module.exports = async (cid, fileName) => {
+    const validateCID = isValidCID(cid)
+    if (!validateCID) {
+      console.log(`Invalid CID: ${cid}`);
+      return null;
+    }
     const urllist = [
       `https://${cid}.ipfs.w3s.link/${fileName}`
     ];

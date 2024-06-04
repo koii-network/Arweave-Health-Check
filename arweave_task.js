@@ -5,7 +5,7 @@ const nacl = require('tweetnacl');
 const bs58 = require('bs58');
 const dataDb = require('./helpers/db');
 const {KoiiStorageClient} = require('@_koii/storage-task-sdk');
-const client = new KoiiStorageClient(undefined, undefined, true);
+const client = new KoiiStorageClient(undefined, undefined, false);
 
 const fs = require('fs');
 const { getRandomTransactionId } = require('./helpers/randomTx');

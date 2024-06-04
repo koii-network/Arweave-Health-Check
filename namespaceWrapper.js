@@ -8,7 +8,7 @@
  *  
  * @version 1.0.0
  */
-
+const semver = require('semver');
 const { default: axios } = require('axios');
 const { TASK_ID, SECRET_KEY, TASK_NODE_PORT } = require('./init');
 const { Connection, PublicKey, Keypair } = require('@_koi/web3.js');
@@ -574,11 +574,12 @@ class NamespaceWrapper {
     }
   }
 
-  async getTaskSubmissionInfo(round) {
+  async getTaskSubmissionInfo(round, forcefetch = false) {
     if (taskNodeAdministered) {
       const taskSubmissionInfo = await genericHandler(
         'getTaskSubmissionInfo',
         round,
+        forcefetch,
       );
       if (!taskSubmissionInfo || taskSubmissionInfo.error) {
         return null;
@@ -704,6 +705,11 @@ class NamespaceWrapper {
   async validateAndVoteOnDistributionList(validateDistribution, round, isPreviousRoundFailed=false) {
     // await this.checkVoteStatus();
     console.log('******/  IN VOTING OF DISTRIBUTION LIST /******');
+    let tasknodeVersionSatisfied = false;
+    const taskNodeVersion = await this.getTaskNodeVersion();
+    if (semver.gte(taskNodeVersion, "1.11.19")) {
+      tasknodeVersionSatisfied = true;
+    } 
     let taskAccountDataJSON = null;
     try {
       taskAccountDataJSON = await this.getTaskDistributionInfo(round);
@@ -787,7 +793,7 @@ class NamespaceWrapper {
                   response,
                 );
               }
-            } else if (isValid == false) {
+            } else if (isValid == false&& tasknodeVersionSatisfied) {
               // Call auditSubmission function and isValid is passed as false
               console.log('RAISING AUDIT / VOTING FALSE ON DISTRIBUTION');
               const response = await this.distributionListAuditSubmission(
@@ -806,6 +812,18 @@ class NamespaceWrapper {
           }
         }
       
+    }
+  }
+  async getTaskNodeVersion() {
+    if (taskNodeAdministered) {
+      try {
+        return await genericHandler("getTaskNodeVersion");
+      } catch (error) {
+        console.error("Error getting task node version", error);
+        return;
+      }
+    } else {
+      return "1.11.19";
     }
   }
   async getTaskLevelDBPath() {
@@ -843,7 +861,7 @@ class NamespaceWrapper {
   async nodeSelectionDistributionList(round, isPreviousFailed) {
     let taskAccountDataJSON = null;
     try {
-      taskAccountDataJSON = await this.getTaskSubmissionInfo(round);
+      taskAccountDataJSON = await this.getTaskSubmissionInfo(round, forcefetch=true);
     } catch (error) {
       console.error('Task submission not found', error);
       return;
@@ -870,7 +888,7 @@ class NamespaceWrapper {
         } else {
           let roundSubmissions = null;
           try {
-            roundSubmissions = await this.getTaskSubmissionInfo(r);
+            roundSubmissions = await this.getTaskSubmissionInfo(r, forcefetch=true);
             if (roundSubmissions && roundSubmissions.submissions[r]) {
               return new Set(Object.keys(roundSubmissions.submissions[r]));
             }

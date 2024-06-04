@@ -51,6 +51,7 @@ class CoreLogic {
       try {
         taskAccountDataJSON = await namespaceWrapper.getTaskSubmissionInfo(
           round,
+          forcefetch=true
         );
       } catch (error) {
         console.error('ERROR IN FETCHING TASK SUBMISSION DATA', error);
@@ -273,7 +274,7 @@ class CoreLogic {
       const submission = await this.fetchSubmission(roundNumber);
       console.log('SUBMISSION', submission);
       // submit the submission to the K2
-      if (submission !== null) {
+      if (submission) {
         await namespaceWrapper.checkSubmissionAndUpdateRound(
           submission,
           roundNumber,

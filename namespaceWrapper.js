@@ -861,7 +861,7 @@ class NamespaceWrapper {
   async nodeSelectionDistributionList(round, isPreviousFailed) {
     let taskAccountDataJSON = null;
     try {
-      taskAccountDataJSON = await this.getTaskSubmissionInfo(round, forcefetch=true);
+      taskAccountDataJSON = await this.getTaskSubmissionInfo(round, true);
     } catch (error) {
       console.error('Task submission not found', error);
       return;
@@ -888,7 +888,7 @@ class NamespaceWrapper {
         } else {
           let roundSubmissions = null;
           try {
-            roundSubmissions = await this.getTaskSubmissionInfo(r, forcefetch=true);
+            roundSubmissions = await this.getTaskSubmissionInfo(r, true);
             if (roundSubmissions && roundSubmissions.submissions[r]) {
               return new Set(Object.keys(roundSubmissions.submissions[r]));
             }

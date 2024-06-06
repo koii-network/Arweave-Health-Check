@@ -25,7 +25,7 @@ minimum_stake_amount: 1.9
 # total bounty is not accepted in case of update task
 total_bounty_amount: 10000
 
-bounty_amount_per_round: 2000
+bounty_amount_per_round: 5000
 
 #Number of times allowed to re-submit the distribution list in case the distribution list is audited
 allowed_failed_distributions: 3
@@ -47,7 +47,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'HntrLuBBxWdYmY4pepb2CvdxSyPMmhoepEwqkWsmnNsh'
+task_id: 'AiWyVuBU3Cxe8MmsudQ9T4iYsBYJXwmLzBbUyGc9cqj6'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Update Arweave Task.'
+migrationDescription: 'Rewards per round increased to 5000 KOII'

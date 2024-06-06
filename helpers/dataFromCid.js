@@ -1,5 +1,6 @@
 const axios = require('axios');
 const { CID } = require('multiformats/cid');
+const {KoiiStorageClient} = require('@_koii/storage-task-sdk');
 
 function isValidCID(cid) {
   try {

@@ -97,9 +97,9 @@ class CoreLogic {
               // to do so we need to fetch the stakes of the candidate from the task state
               const stake_list = taskStakeListJSON.stake_list;
               const candidateStake = stake_list[candidatePublicKey];
-              const slashedStake = Math.floor(candidateStake * 0.7);
-              distributionList[candidatePublicKey] = -slashedStake;
-              console.log('Candidate Stake', candidateStake);
+              // const slashedStake = Math.floor(candidateStake * 0.7);
+              distributionList[candidatePublicKey] = 0;
+              // console.log('Candidate Stake', candidateStake);
             } else {
               let numOfVotes = 0;
               for (let index = 0; index < votes.length; index++) {
@@ -113,9 +113,9 @@ class CoreLogic {
                 // to do so we need to fetch the stakes of the candidate from the task state
                 const stake_list = taskStakeListJSON.stake_list;
                 const candidateStake = stake_list[candidatePublicKey];
-                const slashedStake = Math.floor(candidateStake * 0.7);
-                distributionList[candidatePublicKey] = -slashedStake;
-                console.log('Candidate Stake', candidateStake);
+                // const slashedStake = Math.floor(candidateStake * 0.7);
+                distributionList[candidatePublicKey] = 0;
+                // console.log('Candidate Stake', candidateStake);
               }
 
               if (numOfVotes > 0) {
@@ -139,7 +139,7 @@ class CoreLogic {
       for (let i = 0; i < distributionCandidates.length; i++) {
         distributionList[distributionCandidates[i]] = reward;
       }
-      console.log('Distribution List', distributionList);
+      // console.log('Distribution List', distributionList);
       return distributionList;
     } catch (err) {
       console.log('ERROR IN GENERATING DISTRIBUTION LIST', err);
@@ -267,10 +267,10 @@ class CoreLogic {
     console.log('submitTask called with round', roundNumber);
     try {
       // console.log('inside try');
-      console.log(
-        await namespaceWrapper.getSlot(),
-        'current slot while calling submit',
-      );
+      // console.log(
+      //   await namespaceWrapper.getSlot(),
+      //   'current slot while calling submit',
+      // );
       const submission = await this.fetchSubmission(roundNumber);
       console.log('SUBMISSION', submission);
       // submit the submission to the K2

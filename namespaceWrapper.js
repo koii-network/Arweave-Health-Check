@@ -650,7 +650,7 @@ class NamespaceWrapper {
               // check for the submissions_audit_trigger , if it exists then vote true on that otherwise do nothing
               const submissions_audit_trigger =
                 taskAccountDataJSON.submissions_audit_trigger[round];
-              console.log('SUBMIT AUDIT TRIGGER', submissions_audit_trigger);
+              // console.log('SUBMIT AUDIT TRIGGER', submissions_audit_trigger);
               // console.log(
               //   "CANDIDATE PUBKEY CHECK IN AUDIT TRIGGER",
               //   submissions_audit_trigger[candidatePublicKey]
@@ -935,7 +935,7 @@ class NamespaceWrapper {
           console.log('SUBMITTER SIZE', submitterSize);
 
           for (let j = 0; j < submitterSize; j++) {
-            console.log('SUBMITTER KEY CANDIDATE', submitterKeys[j]);
+            // console.log('SUBMITTER KEY CANDIDATE', submitterKeys[j]);
             const id = keys.indexOf(submitterKeys[j]);
             console.log('ID', id);
             if (id != -1) {

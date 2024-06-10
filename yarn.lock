@@ -22,6 +22,26 @@
     superstruct "^0.14.2"
     tweetnacl "^1.0.0"
 
+"@_koi/web3.js@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@_koi/web3.js/-/web3.js-0.0.7.tgz#912260f2430780aeda5908246003543846d92821"
+  integrity sha512-L0UL42HnEZ6dIZ4OyvRe35u+jXIW6MhZeSBsnnJxQQhLrRbpuJIlrLeYOjaX4jdsct2HuNbaM1SL1oVOVGAMHg==
+  dependencies:
+    "@babel/runtime" "^7.12.5"
+    "@ethersproject/sha2" "^5.5.0"
+    "@solana/buffer-layout" "^3.0.0"
+    bn.js "^5.0.0"
+    borsh "^0.4.0"
+    bs58 "^4.0.1"
+    buffer "6.0.1"
+    cross-fetch "^3.1.4"
+    jayson "^3.4.4"
+    js-sha3 "^0.8.0"
+    rpc-websockets "^7.4.2"
+    secp256k1 "^4.0.2"
+    superstruct "^0.14.2"
+    tweetnacl "^1.0.0"
+
 "@_koii/create-task-cli@^0.1.21":
   version "0.1.28"
   resolved "https://registry.yarnpkg.com/@_koii/create-task-cli/-/create-task-cli-0.1.28.tgz#67a3a5781c7eb97b6cb858c93d875faa178c462a"

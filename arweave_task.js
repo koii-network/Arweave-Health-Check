@@ -4,7 +4,7 @@ const { namespaceWrapper } = require('./namespaceWrapper');
 const nacl = require('tweetnacl');
 const bs58 = require('bs58');
 const dataDb = require('./helpers/db');
-const {KoiiStorageClient} = require('@_koii/storage-task-sdk');
+const { KoiiStorageClient } = require('@_koii/storage-task-sdk');
 const client = new KoiiStorageClient(undefined, undefined, false);
 
 const fs = require('fs');
@@ -18,37 +18,47 @@ const run = async round => {
 
   // let publicKeyHex = Buffer.from(keypair._keypair.publicKey).toString('hex');
 
-  let query = 'web3'; // the query our twitter search will use
+  try {
+    let query = 'web3'; // the query our twitter search will use
 
-  let options = {
-    maxRetry: 3,
-    query: query,
-  };
+    let options = {
+      maxRetry: 3,
+      query: query,
+    };
 
-  let txid = await getRandomTransactionId();
+    let txid = await getRandomTransactionId();
 
-  await dataDb.intializeData();
-  const adapter = new Arweave(credentials, options.maxRetry, dataDb, txid);
+    if (!txid) {
+      console.error('Failed to get random transaction ID');
+      return null;
+    }
 
-  const gatherer = new Gatherer(dataDb, adapter, options, round);
+    await dataDb.intializeData();
+    const adapter = new Arweave(credentials, options.maxRetry, dataDb, txid);
 
-  // run a gatherer to get 10 items
-  let result = await gatherer.gather(10);
+    const gatherer = new Gatherer(dataDb, adapter, options, round);
 
-  // const messageUint8Array = new Uint8Array(Buffer.from(result));
+    // run a gatherer to get 10 items
+    let result = await gatherer.gather(10);
 
-  // const signedMessage = nacl.sign(messageUint8Array, keypair.secretKey);
-  // const signature = signedMessage.slice(0, nacl.sign.signatureLength);
+    // const messageUint8Array = new Uint8Array(Buffer.from(result));
 
-  // const submission_value = {
-  //   proofs: result,
-  //   node_publicKey: publicKeyHex,
+    // const signedMessage = nacl.sign(messageUint8Array, keypair.secretKey);
+    // const signature = signedMessage.slice(0, nacl.sign.signatureLength);
+
+    // const submission_value = {
+    //   proofs: result,
+    //   node_publicKey: publicKeyHex,
     // node_signature: bs58.encode(signature),
-  // };
+    // };
 
-  // const proof_cid = await uploadIPFS(submission_value, round);
+    // const proof_cid = await uploadIPFS(submission_value, round);
 
-  return result;
+    return result;
+  } catch (err) {
+    console.error('Error running the gatherer:', err);
+    return null;
+  }
 };
 
 // uploadIPFS = async function (data, round) {
@@ -79,7 +89,6 @@ const run = async round => {
 //           proof_cid = null;
 //           console.log('error getting CID', err);
 //         }
-        
 
 //         // console.log(`CID: ${proof_cid}`);
 //         console.log('Arweave healthy list to IPFS: ', proof_cid);

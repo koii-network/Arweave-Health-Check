@@ -4,23 +4,28 @@ const arweave_validate = require('./arweave_validate');
 const dataDb = require('./helpers/db');
 class CoreLogic {
   async task(round) {
-    // run arweave web scrapping
-    console.log('********Arweave Webscrapiing started**********');
+    try {
+      // run arweave web scrapping
+      console.log('********Arweave Webscrapiing started**********');
 
-    // console.log('Scraping task called in round', round);
-    const cid = await arweave_task(round);
+      // console.log('Scraping task called in round', round);
+      const cid = await arweave_task(round);
 
-    if (cid) {
-      await dataDb.intializeData();
-      await dataDb.addProof(round, cid); // store CID in levelDB
-      console.log('Node Proof CID stored in round', round);
-    } else {
-      console.log('CID NOT FOUND');
+      if (cid) {
+        await dataDb.intializeData();
+        await dataDb.addProof(round, cid); // store CID in levelDB
+        console.log('Node Proof CID stored in round', round);
+      } else {
+        console.log('CID NOT FOUND');
+      }
+
+      console.log('********Arweave Webscrapiing ended**********');
+
+      return cid;
+    } catch (error) {
+      console.log('Error in task job', error);
+      return null;
     }
-
-    console.log('********Arweave Webscrapiing ended**********');
-
-    return cid;
   }
 
   async fetchSubmission(round) {
@@ -51,7 +56,7 @@ class CoreLogic {
       try {
         taskAccountDataJSON = await namespaceWrapper.getTaskSubmissionInfo(
           round,
-          true
+          true,
         );
       } catch (error) {
         console.error('ERROR IN FETCHING TASK SUBMISSION DATA', error);
@@ -171,7 +176,7 @@ class CoreLogic {
     } catch (err) {
       console.log('ERROR IN SUBMIT DISTRIBUTION', err);
     }
-  }
+  };
 
   async selectAndGenerateDistributionList(
     round,
@@ -242,7 +247,7 @@ class CoreLogic {
         _dummyTaskState,
       );
 
-      if(Object.keys(generateDistributionList).length === 0) {
+      if (Object.keys(generateDistributionList).length === 0) {
         console.log('UNABLE TO GENERATE DISTRIBUTION LIST');
         return true;
       }

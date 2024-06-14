@@ -1,4 +1,4 @@
-const { namespaceWrapper } = require('./namespaceWrapper');
+const { namespaceWrapper } = require('@_koii/namespaceWrapper');
 const arweave_task = require('./arweave_task');
 const arweave_validate = require('./arweave_validate');
 const dataDb = require('./helpers/db');

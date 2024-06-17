@@ -1,7 +1,7 @@
 # Name and metadata of your task
-task_name: 'Arweave Verifier Testing'
+task_name: 'Arweave Verifier'
 author: 'Soma'
-description: 'This task checks health of the nodes on Arweave Network. It fetch all nodes and check their health then upload the total nodes and healthy nodes list to IPFS. Data contains the total nodes, healthy nodes list, and each transactions available nodes. If the transaction shows Not Found, means this transaction is not on arweave.net/_tx_ but can be found on viewblock. The bounty per round is 5000 KOII, which will be divided among users who have made submissions in the last round.'
+description: 'This task checks health of the nodes on Arweave Network. It fetch all nodes and check their health then upload the total nodes and healthy nodes list to IPFS. Data contains the total nodes, healthy nodes list, and each transactions available nodes. If the transaction shows Not Found, means this transaction is not on arweave.net/_tx_ but can be found on viewblock. The bounty per round is 3000 KOII, which will be divided among users who have made submissions in the last round.'
 repositoryUrl: 'https://github.com/koii-network/Arweave-Health-Check'
 imageUrl: 'https://bafybeieuimdnbsfgpy4t2jezr6tuupw6z3ia4gefztl4uyeu2d76mkaiky.ipfs.w3s.link/arweave_task.png'
 
@@ -12,10 +12,10 @@ task_executable_network: 'IPFS'
 task_audit_program: 'dist/main.js'
 
 # Total round time of your task : it must be given in slots and each slot is roughly equal to 408ms
-round_time: 6000
+round_time: 13500
 
-audit_window: 2500
-submission_window: 2500
+audit_window: 5000
+submission_window: 5000
 
 # Amounts in KOII
 
@@ -23,9 +23,9 @@ minimum_stake_amount: 1.9
 
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
-total_bounty_amount: 10
+total_bounty_amount: 3000
 
-bounty_amount_per_round: 1
+bounty_amount_per_round: 3000
 
 #Number of times allowed to re-submit the distribution list in case the distribution list is audited
 allowed_failed_distributions: 3
@@ -47,7 +47,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'EZzHt5PmSpKQGtjdocVGh4cY8DFiAgFoucSupKHvMAec'
+task_id: 'Agakacut8jV3zmavzNmyfnYDXS5KGsFCBA9ndn1PCmRq'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Rewards per round increased to 5000 KOII'
+migrationDescription: 'Rewards per round increased to 3000 KOII and fix the audit issue'

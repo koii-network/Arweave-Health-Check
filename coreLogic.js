@@ -4,23 +4,28 @@ const arweave_validate = require('./arweave_validate');
 const dataDb = require('./helpers/db');
 class CoreLogic {
   async task(round) {
-    // run arweave web scrapping
-    console.log('********Arweave Webscrapiing started**********');
+    try {
+      // run arweave web scrapping
+      console.log('********Arweave Webscrapiing started**********');
 
-    // console.log('Scraping task called in round', round);
-    const cid = await arweave_task(round);
+      // console.log('Scraping task called in round', round);
+      const cid = await arweave_task(round);
 
-    if (cid) {
-      await dataDb.intializeData();
-      await dataDb.addProof(round, cid); // store CID in levelDB
-      console.log('Node Proof CID stored in round', round);
-    } else {
-      console.log('CID NOT FOUND');
+      if (cid) {
+        await dataDb.intializeData();
+        await dataDb.addProof(round, cid); // store CID in levelDB
+        console.log('Node Proof CID stored in round', round);
+      } else {
+        console.log('CID NOT FOUND');
+      }
+
+      console.log('********Arweave Webscrapiing ended**********');
+
+      return cid;
+    } catch (error) {
+      console.log('Error in task job', error);
+      return null;
     }
-
-    console.log('********Arweave Webscrapiing ended**********');
-
-    return cid;
   }
 
   async fetchSubmission(round) {
@@ -46,8 +51,21 @@ class CoreLogic {
 
       let distributionList = {};
       let distributionCandidates = [];
-      let taskAccountDataJSON = await namespaceWrapper.getTaskState();
-      if (taskAccountDataJSON == null) taskAccountDataJSON = _dummyTaskState;
+      let taskAccountDataJSON = null;
+      let taskStakeListJSON = null;
+      try {
+        taskAccountDataJSON = await namespaceWrapper.getTaskSubmissionInfo(
+          round,
+          true,
+        );
+      } catch (error) {
+        console.error('ERROR IN FETCHING TASK SUBMISSION DATA', error);
+        return distributionList;
+      }
+      if (taskAccountDataJSON == null) {
+        console.error('ERROR IN FETCHING TASK SUBMISSION DATA');
+        return distributionList;
+      }
       const submissions = taskAccountDataJSON.submissions[round];
       const submissions_audit_trigger =
         taskAccountDataJSON.submissions_audit_trigger[round];
@@ -59,7 +77,13 @@ class CoreLogic {
         const values = Object.values(submissions);
         const size = values.length;
         // console.log('Submissions from last round: ', keys, values, size);
-
+        taskStakeListJSON = await namespaceWrapper.getTaskState({
+          is_stake_list_required: true,
+        });
+        if (taskStakeListJSON == null) {
+          console.error('ERROR IN FETCHING TASK STAKING LIST');
+          return distributionList;
+        }
         // Logic for slashing the stake of the candidate who has been audited and found to be false
         for (let i = 0; i < size; i++) {
           const candidatePublicKey = keys[i];
@@ -76,11 +100,11 @@ class CoreLogic {
               // slash 70% of the stake as still the audit is triggered but no votes are casted
               // Note that the votes are on the basis of the submission value
               // to do so we need to fetch the stakes of the candidate from the task state
-              const stake_list = taskAccountDataJSON.stake_list;
+              const stake_list = taskStakeListJSON.stake_list;
               const candidateStake = stake_list[candidatePublicKey];
-              const slashedStake = Math.floor(candidateStake * 0.7);
-              distributionList[candidatePublicKey] = -slashedStake;
-              console.log('Candidate Stake', candidateStake);
+              // const slashedStake = Math.floor(candidateStake * 0.7);
+              distributionList[candidatePublicKey] = 0;
+              // console.log('Candidate Stake', candidateStake);
             } else {
               let numOfVotes = 0;
               for (let index = 0; index < votes.length; index++) {
@@ -88,15 +112,15 @@ class CoreLogic {
                 else numOfVotes--;
               }
 
-              if (numOfVotes < 0) {
+              if (numOfVotes < 0 && taskStakeListJSON) {
                 // slash 70% of the stake as the number of false votes are more than the number of true votes
                 // Note that the votes are on the basis of the submission value
                 // to do so we need to fetch the stakes of the candidate from the task state
-                const stake_list = taskAccountDataJSON.stake_list;
+                const stake_list = taskStakeListJSON.stake_list;
                 const candidateStake = stake_list[candidatePublicKey];
-                const slashedStake = Math.floor(candidateStake * 0.7);
-                distributionList[candidatePublicKey] = -slashedStake;
-                console.log('Candidate Stake', candidateStake);
+                // const slashedStake = Math.floor(candidateStake * 0.7);
+                distributionList[candidatePublicKey] = 0;
+                // console.log('Candidate Stake', candidateStake);
               }
 
               if (numOfVotes > 0) {
@@ -113,14 +137,14 @@ class CoreLogic {
       // Here it is assumed that all the nodes doing valid submission gets the same reward
 
       const reward = Math.floor(
-        taskAccountDataJSON.bounty_amount_per_round /
+        taskStakeListJSON.bounty_amount_per_round /
           distributionCandidates.length,
       );
       console.log('REWARD RECEIVED BY EACH NODE', reward);
       for (let i = 0; i < distributionCandidates.length; i++) {
         distributionList[distributionCandidates[i]] = reward;
       }
-      console.log('Distribution List', distributionList);
+      // console.log('Distribution List', distributionList);
       return distributionList;
     } catch (err) {
       console.log('ERROR IN GENERATING DISTRIBUTION LIST', err);
@@ -134,7 +158,10 @@ class CoreLogic {
 
     try {
       const distributionList = await this.generateDistributionList(round);
-
+      if (Object.keys(distributionList).length === 0) {
+        console.log('NO DISTRIBUTION LIST GENERATED');
+        return;
+      }
       const decider = await namespaceWrapper.uploadDistributionList(
         distributionList,
         round,
@@ -149,7 +176,7 @@ class CoreLogic {
     } catch (err) {
       console.log('ERROR IN SUBMIT DISTRIBUTION', err);
     }
-  }
+  };
 
   async selectAndGenerateDistributionList(
     round,
@@ -172,48 +199,70 @@ class CoreLogic {
     return vote;
   }
 
-  async shallowEqual(object1, object2) {
-    const keys1 = Object.keys(object1);
-    const keys2 = Object.keys(object2);
+  async shallowEqual(parsed, generateDistributionList) {
+    if (typeof parsed === 'string') {
+      parsed = JSON.parse(parsed);
+    }
+
+    // Normalize key quote usage for generateDistributionList
+    generateDistributionList = JSON.parse(
+      JSON.stringify(generateDistributionList),
+    );
+
+    const keys1 = Object.keys(parsed);
+    const keys2 = Object.keys(generateDistributionList);
     if (keys1.length !== keys2.length) {
       return false;
     }
+
     for (let key of keys1) {
-      if (object1[key] !== object2[key]) {
+      if (parsed[key] !== generateDistributionList[key]) {
         return false;
       }
     }
     return true;
   }
 
-  validateDistribution = async (distributionListSubmitter, round) => {
+  validateDistribution = async (
+    distributionListSubmitter,
+    round,
+    _dummyDistributionList,
+    _dummyTaskState,
+  ) => {
     try {
-      console.log('Validate Distribution called');
-      console.log('Distribution list Submitter', distributionListSubmitter);
-      const fetchedDistributionList = JSON.parse(
-        await namespaceWrapper.getDistributionList(
-          distributionListSubmitter,
-          round,
-        ),
+      // console.log('DISTRIBUTION LIST SUBMITTER', distributionListSubmitter);
+      const rawDistributionList = await namespaceWrapper.getDistributionList(
+        distributionListSubmitter,
+        round,
       );
+      let fetchedDistributionList;
+      if (rawDistributionList == null) {
+        return true;
+      } else {
+        fetchedDistributionList = JSON.parse(rawDistributionList);
+      }
       // console.log('FETCHED DISTRIBUTION LIST', fetchedDistributionList);
       const generateDistributionList = await this.generateDistributionList(
         round,
+        _dummyTaskState,
       );
 
-      // compare distribution list
-
-      const parsed = JSON.parse(fetchedDistributionList);
+      if (Object.keys(generateDistributionList).length === 0) {
+        console.log('UNABLE TO GENERATE DISTRIBUTION LIST');
+        return true;
+      }
+      // Compare distribution list
+      const parsed = fetchedDistributionList;
       // console.log(
-      //   'compare distribution list',
+      //   'COMPARE DISTRIBUTION LIST',
       //   parsed,
       //   generateDistributionList,
       // );
       const result = await this.shallowEqual(parsed, generateDistributionList);
-      console.log('RESULT', result);
+      // console.log('RESULT', result);
       return result;
     } catch (err) {
-      // console.log('ERROR IN VALIDATING DISTRIBUTION', err);
+      console.log('ERROR IN VALIDATING DISTRIBUTION', err);
       return true;
     }
   };
@@ -223,14 +272,14 @@ class CoreLogic {
     console.log('submitTask called with round', roundNumber);
     try {
       // console.log('inside try');
-      console.log(
-        await namespaceWrapper.getSlot(),
-        'current slot while calling submit',
-      );
+      // console.log(
+      //   await namespaceWrapper.getSlot(),
+      //   'current slot while calling submit',
+      // );
       const submission = await this.fetchSubmission(roundNumber);
       console.log('SUBMISSION', submission);
       // submit the submission to the K2
-      if (submission !== null) {
+      if (submission) {
         await namespaceWrapper.checkSubmissionAndUpdateRound(
           submission,
           roundNumber,
@@ -254,13 +303,11 @@ class CoreLogic {
     );
   }
 
-  async auditDistribution(roundNumber, isPreviousRoundFailed) {
-    console.log('auditDistribution called with round', roundNumber);
+  async auditDistribution(roundNumber) {
+    console.log('AUDIT DISTRIBUTION CALLED WITHIN ROUND: ', roundNumber);
     await namespaceWrapper.validateAndVoteOnDistributionList(
       this.validateDistribution,
       roundNumber,
-      isPreviousRoundFailed
-
     );
   }
 }

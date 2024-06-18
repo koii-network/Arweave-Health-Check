@@ -51,6 +51,7 @@ const getRandomTransactionId = async () => {
     return randomTransactionId;
   } catch (error) {
     console.error('Failed to get random transaction:', error);
+    return null;
   }
 }
 

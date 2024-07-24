@@ -2,28 +2,47 @@ const dataFromCid = require('./helpers/dataFromCid');
 const nacl = require('tweetnacl');
 const bs58 = require('bs58');
 const { default: axios } = require('axios');
+const { json } = require('express');
+async function checkTx(peer, txid) {
+  // if (!this.isHealthy) await this.healthCheck();
 
+  if (this.isHealthy) {
+    try {
+      let txurl = new URL(`http://${peer}/tx/${txid}/status`);
+      console.log(txurl);
+      // console.log('sending txid check for ', txurl.href);
+      const response = await axios.get(txurl.href, this.headers);
+      // console.log('payload returned from ' + peerUrl, payload)
+      // console.log(response.status)
+      if (response.status == 200 && response.data !== 'Not Found.') {
+        // console.log(`Exist tx ${response.data.id} on ${peer}`);
+        this.containsTx = true;
+      }
+    } catch (err) {
+      // console.log("can't fetch " + this.location + ' ' + err);
+      this.containsTx = false;
+    }
+  }
+  return this.containsTx;
+};
 module.exports = async (submission_value, round) => {
   console.log('******/ Areawve Scrapping VALIDATION Task FUNCTION /******');
   try {
     const outputraw = await dataFromCid(submission_value, 'healthyList.json');
-    const output = outputraw;
-    console.log('OUTPUT', output);
 
-    // // Check that the node who submitted the proofs is a valid staked node
-    // let isNode = await verifyNode(
-    //   output.proofs,
-    //   output.node_signature,
-    //   output.node_publicKey,
-    // );
-    // console.log("Is the node's signature on the CID payload correct?", isNode);
+    const jsonString = JSON.stringify(outputraw, null, 2);
+    const parsedJSON = JSON.parse(jsonString);
 
-    // // check each item in the linktrees list and verify that the node is holding that payload, and the signature matches
-    // let isPeer = await verifyPeers(output.proofs);
-    // console.log('Are peers True?', isPeer);
 
-    // if (isNode == true && isPeer == true) return true; // if both are true, return true
-    // else return false; // if one of them is false, return false
+    for (let key in parsedJSON){
+      if (key != "totalNodes" && parsedJSON[key] != 'Not Found'){
+        for (let value of parsedJSON[key]){
+          
+            const result = await checkTx(value, key);
+            return result
+        }
+      }
+    }
     
     return true;
 

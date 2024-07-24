@@ -2,30 +2,55 @@ const dataFromCid = require('./helpers/dataFromCid');
 const nacl = require('tweetnacl');
 const bs58 = require('bs58');
 const { default: axios } = require('axios');
-
+const { json } = require('express');
+async function checkTx(peer, txid) {
+  // if (!this.isHealthy) await this.healthCheck();
+    try {
+      let txurl = new URL(`http://${peer}/tx/${txid}/status`);
+      // console.log('sending txid check for ', txurl.href);
+      const response = await axios.get(txurl.href, this.headers);
+      // console.log('payload returned from ' + peerUrl, payload)
+      // console.log(response.status)
+      if (response.status == 200 && response.data !== 'Not Found.') {
+        // console.log(`Exist tx ${response.data.id} on ${peer}`);
+        return true;
+      }
+    } catch (err) {
+      // console.log("can't fetch " + this.location + ' ' + err);
+      return false;
+    }
+  };
 module.exports = async (submission_value, round) => {
   console.log('******/ Areawve Scrapping VALIDATION Task FUNCTION /******');
   try {
     const outputraw = await dataFromCid(submission_value, 'healthyList.json');
-    const output = outputraw;
-    console.log('OUTPUT', output);
 
-    // // Check that the node who submitted the proofs is a valid staked node
-    // let isNode = await verifyNode(
-    //   output.proofs,
-    //   output.node_signature,
-    //   output.node_publicKey,
-    // );
-    // console.log("Is the node's signature on the CID payload correct?", isNode);
+    const jsonString = JSON.stringify(outputraw, null, 2);
+    const parsedJSON = JSON.parse(jsonString);
 
-    // // check each item in the linktrees list and verify that the node is holding that payload, and the signature matches
-    // let isPeer = await verifyPeers(output.proofs);
-    // console.log('Are peers True?', isPeer);
+    let successedVerifies = 0;
+    let totalVerifies = 0;
+    for (let key in parsedJSON){
+      if (key != "totalNodes" && parsedJSON[key] != 'Not Found'){
+        for (let value of parsedJSON[key]){
+            const result = await checkTx(value, key);
+            if (result){
+              successedVerifies += 1;
+              totalVerifies += 1;
+            }else{
+              totalVerifies += 1;
+            }
 
-    // if (isNode == true && isPeer == true) return true; // if both are true, return true
-    // else return false; // if one of them is false, return false
+        }
+      }
+    }
     
-    return true;
+    if (successedVerifies/totalVerifies>=0.8){
+      return true;
+    }else{
+      console.log(`Successfully Verified ${successedVerifies} and the total is ${totalVerifies}`)
+      return false;
+    }
 
   } catch (err) {
     console.log('ERROR IN ARWEAVE VALIDATION FUNCTION', err);

@@ -5,26 +5,21 @@ const { default: axios } = require('axios');
 const { json } = require('express');
 async function checkTx(peer, txid) {
   // if (!this.isHealthy) await this.healthCheck();
-
-  if (this.isHealthy) {
     try {
       let txurl = new URL(`http://${peer}/tx/${txid}/status`);
-      console.log(txurl);
       // console.log('sending txid check for ', txurl.href);
       const response = await axios.get(txurl.href, this.headers);
       // console.log('payload returned from ' + peerUrl, payload)
       // console.log(response.status)
       if (response.status == 200 && response.data !== 'Not Found.') {
         // console.log(`Exist tx ${response.data.id} on ${peer}`);
-        this.containsTx = true;
+        return true;
       }
     } catch (err) {
       // console.log("can't fetch " + this.location + ' ' + err);
-      this.containsTx = false;
+      return false;
     }
-  }
-  return this.containsTx;
-};
+  };
 module.exports = async (submission_value, round) => {
   console.log('******/ Areawve Scrapping VALIDATION Task FUNCTION /******');
   try {
@@ -33,18 +28,29 @@ module.exports = async (submission_value, round) => {
     const jsonString = JSON.stringify(outputraw, null, 2);
     const parsedJSON = JSON.parse(jsonString);
 
-
+    let successedVerifies = 0;
+    let totalVerifies = 0;
     for (let key in parsedJSON){
       if (key != "totalNodes" && parsedJSON[key] != 'Not Found'){
         for (let value of parsedJSON[key]){
-          
             const result = await checkTx(value, key);
-            return result
+            if (result){
+              successedVerifies += 1;
+              totalVerifies += 1;
+            }else{
+              totalVerifies += 1;
+            }
+
         }
       }
     }
     
-    return true;
+    if (successedVerifies/totalVerifies>=0.8){
+      return true;
+    }else{
+      console.log(`Successfully Verified ${successedVerifies} and the total is ${totalVerifies}`)
+      return false;
+    }
 
   } catch (err) {
     console.log('ERROR IN ARWEAVE VALIDATION FUNCTION', err);

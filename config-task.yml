@@ -1,9 +1,10 @@
 # Name and metadata of your task
 task_name: 'Arweave Verifier'
 author: 'Soma'
-description: 'This task checks health of the nodes on Arweave Network. It fetch all nodes and check their health then upload the total nodes and healthy nodes list to IPFS. Data contains the total nodes, healthy nodes list, and each transactions available nodes. If the transaction shows Not Found, means this transaction is not on arweave.net/_tx_ but can be found on viewblock. The bounty per round is 3000 KOII, which will be divided among users who have made submissions in the last round.'
+description: 'This task checks health of the nodes on Arweave Network. It fetch all nodes and check their health then upload the total nodes and healthy nodes list to IPFS. Data contains the total nodes, healthy nodes list, and each transactions available nodes. If the transaction shows Not Found, means this transaction is not on arweave.net/_tx_ but can be found on viewblock. The bounty per round is 3000 FIRE, which will be divided among users who have made submissions in the last round.'
 repositoryUrl: 'https://github.com/koii-network/Arweave-Health-Check'
 imageUrl: 'https://bafybeieuimdnbsfgpy4t2jezr6tuupw6z3ia4gefztl4uyeu2d76mkaiky.ipfs.w3s.link/arweave_task.png'
+infoUrl: 'https://www.koii.network/ocean'
 
 # network value can be DEVELOPMENT , ARWEAVE or IPFS, Recommended IPFS when deploying to testnet as the cli automatically takes care of uploading the executable with the help of web3.js key
 task_executable_network: 'IPFS'
@@ -17,13 +18,18 @@ round_time: 13500
 audit_window: 5000
 submission_window: 5000
 
-# Amounts in KOII
+# Task Bounty Type: KOII, KPL
+task_type: 'KPL'
 
+# OPTIONAL (ONLY IF Task Type = KPL) : Token Mint Address, Fire Token as an example here. 
+token_type: "FJG2aEPtertCXoedgteCCMmgngSZo1Zd715oNBzR7xpR"
+
+# Amounts in KOII
 minimum_stake_amount: 1.9
 
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
-total_bounty_amount: 3000
+total_bounty_amount: 300000
 
 bounty_amount_per_round: 3000
 
@@ -31,7 +37,7 @@ bounty_amount_per_round: 3000
 allowed_failed_distributions: 3
 
 #Space in MBs for the account size, that holds the task data
-space: 5
+space: 3
 
 # Note that the value field in RequirementTag is optional, so it is up to you to include it or not based on your use case.
 # To add more global variables and task variables, please refer the type,value,description format shown below

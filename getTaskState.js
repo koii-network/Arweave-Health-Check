@@ -1,9 +1,7 @@
-const nameSpaceWrapper = require('./namespaceWrapper');
+const nameSpaceWrapper = require('@_koii/namespace-wrapper');
 
 let run = async () => {
-
-    console.log(state)  
-     
-}
+  console.log(state);
+};
 
 run();

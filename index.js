@@ -1,10 +1,10 @@
 const { coreLogic } = require('./coreLogic');
-const { app } = require('./init');
 const express = require('express');
 const {
   namespaceWrapper,
   taskNodeAdministered,
-} = require('./namespaceWrapper');
+  app,
+} = require('@_koii/namespace-wrapper');
 // const localShim = require('./k2-local-debugger'); // TEST to enable testing with K2 without round timers, enable this line and line 38
 const routes = require('./routes');
 
@@ -26,13 +26,15 @@ async function setup() {
       coreLogic.task(m.roundNumber);
     } else if (m.functionCall == 'generateAndSubmitDistributionList') {
       console.log('generateAndSubmitDistributionList called');
-      coreLogic.selectAndGenerateDistributionList(m.roundNumber, m.isPreviousRoundFailed);
+      coreLogic.selectAndGenerateDistributionList(
+        m.roundNumber,
+        m.isPreviousRoundFailed,
+      );
     } else if (m.functionCall == 'distributionListAudit') {
       console.log('distributionListAudit called');
       coreLogic.auditDistribution(m.roundNumber, m.isPreviousRoundFailed);
     }
   });
-
 }
 
 // Run main task

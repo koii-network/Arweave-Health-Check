@@ -1,14 +1,11 @@
-
-const coreLogic = require("./coreLogic");
-const namespaceWrapper = require("./namespaceWrapper");
-
+const coreLogic = require('./coreLogic');
+const namespaceWrapper = require('@_koii/namespace-wrapper');
 
 const localShim = async () => {
-
   // TEST Set round
-// let round = 1000
+  // let round = 1000
   const round = await namespaceWrapper.getRound();
-  
+
   /* GUIDE TO CALLS K2 FUNCTIONS MANUALLY
 
   If you wish to do the development by avoiding the timers then you can do the intended calls to K2 
@@ -53,6 +50,6 @@ const localShim = async () => {
 
   // const responsePayout = await namespaceWrapper.payoutTrigger();
   // console.log("RESPONSE TRIGGER", responsePayout);
-}
+};
 
 module.exports = localShim;

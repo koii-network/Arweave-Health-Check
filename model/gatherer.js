@@ -13,10 +13,10 @@ require('dotenv').config();
 const Peer = require('../adapters/arweave/peer');
 // const { Web3Storage, getFilesFromPath, File } = require('web3.storage');
 const { getRandomTransactionId } = require('../helpers/randomTx');
-const {KoiiStorageClient} = require('@_koii/storage-task-sdk');
+const { KoiiStorageClient } = require('@_koii/storage-task-sdk');
 const storageClient = new KoiiStorageClient(undefined, undefined, false);
 const { Queue } = require('async-await-queue');
-const { namespaceWrapper } = require('../namespaceWrapper');
+const { namespaceWrapper } = require('@_koii/namespace-wrapper');
 const fs = require('fs');
 class Gatherer {
   constructor(db, adapter, options, round) {
@@ -251,11 +251,14 @@ class Gatherer {
             const client = new KoiiStorageClient(undefined, undefined, false);
             const userStaking = await namespaceWrapper.getSubmitterAccount();
             console.log(`Uploading ${basePath}/${path}`);
-            const fileUploadResponse = await client.uploadFile(`${basePath}/${path}`,userStaking);
+            const fileUploadResponse = await client.uploadFile(
+              `${basePath}/${path}`,
+              userStaking,
+            );
             console.log(`Uploaded ${basePath}/${path}`);
-            try{
+            try {
               cid = fileUploadResponse.cid;
-            }catch(err){
+            } catch (err) {
               cid = null;
               console.log('error getting CID', err);
             }

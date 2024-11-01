@@ -21,8 +21,8 @@ submission_window: 5000
 # Task Bounty Type: KOII, KPL
 task_type: 'KPL'
 
-# OPTIONAL (ONLY IF Task Type = KPL) : Token Mint Address, Fire Token as an example here. 
-token_type: "FJG2aEPtertCXoedgteCCMmgngSZo1Zd715oNBzR7xpR"
+# OPTIONAL (ONLY IF Task Type = KPL) : Token Mint Address, Fire Token as an example here.
+token_type: 'FJG2aEPtertCXoedgteCCMmgngSZo1Zd715oNBzR7xpR'
 
 # Amounts in KOII
 minimum_stake_amount: 1.9

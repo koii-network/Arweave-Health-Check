@@ -37,8 +37,8 @@ It will run the whole task and return the result.
   - arweave_task()
   - arweave_validate()
 - data.js
-    - addData()
-    - getData()
+  - addData()
+  - getData()
 - namespaceWrapper.js
 
 ### Core Logic
@@ -59,10 +59,7 @@ This is the main database function. It use `nedb` to store the data. In database
 
 #### NamespaceWrapper
 
-This is the main function to interact with task node. It provide several functions to interact with task node. For example:
-    - namespaceWrapper.fs(). It use to wirte or read file if needed.
-    - namespaceWrapper.storeGet(). It use to store data in database.
-    - namespaceWrapper.getRound(). It use to get current round of task.
+This is the main function to interact with task node. It provide several functions to interact with task node. For example: - namespaceWrapper.fs(). It use to wirte or read file if needed. - namespaceWrapper.storeGet(). It use to store data in database. - namespaceWrapper.getRound(). It use to get current round of task.
 
 ## Run and test
 

@@ -1,7 +1,7 @@
 const Gatherer = require('../model/gatherer');
 const Arweave = require('../adapters/arweave/arweave');
 const dataDb = require('../helpers/db');
-// const { namespaceWrapper } = require('./namespaceWrapper');
+// const { namespaceWrapper } = require('@_koii/namespace-wrapper');
 const { Keypair } = require('@solana/web3.js'); // TEST For local testing only
 
 const credentials = {}; // arweave doesn't need credentials
@@ -26,7 +26,6 @@ const run = async () => {
     query: query,
   };
 
-
   await dataDb.intializeData();
   const adapter = new Arweave(
     credentials,
@@ -41,7 +40,6 @@ const run = async () => {
   let result = await gatherer.gather();
 
   return result;
-
 };
 
 run();

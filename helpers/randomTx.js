@@ -29,13 +29,13 @@ const getRandomTransactionId = async () => {
       url: 'https://arweave.net/graphql',
       method: 'post',
       data: {
-        query: query
-      }
+        query: query,
+      },
     });
 
     if (transactionsResponse.data.errors) {
-        throw new Error(JSON.stringify(transactionsResponse.data.errors));
-      }
+      throw new Error(JSON.stringify(transactionsResponse.data.errors));
+    }
 
     // Select a random transaction from the random block
     const transactions = transactionsResponse.data.data.transactions.edges;
@@ -53,8 +53,8 @@ const getRandomTransactionId = async () => {
     console.error('Failed to get random transaction:', error);
     return null;
   }
-}
+};
 
 module.exports = {
-    getRandomTransactionId
-}
+  getRandomTransactionId,
+};

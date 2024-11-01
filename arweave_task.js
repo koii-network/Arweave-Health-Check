@@ -1,6 +1,6 @@
 const Gatherer = require('./model/gatherer');
 const Arweave = require('./adapters/arweave/arweave');
-const { namespaceWrapper } = require('./namespaceWrapper');
+const { namespaceWrapper } = require('@_koii/namespace-wrapper');
 const nacl = require('tweetnacl');
 const bs58 = require('bs58');
 const dataDb = require('./helpers/db');

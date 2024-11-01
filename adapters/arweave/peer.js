@@ -88,7 +88,6 @@ class Peer {
     }
     return this.containsTx;
   };
-
 }
 
 module.exports = Peer;

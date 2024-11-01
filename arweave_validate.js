@@ -5,21 +5,21 @@ const { default: axios } = require('axios');
 const { json } = require('express');
 async function checkTx(peer, txid) {
   // if (!this.isHealthy) await this.healthCheck();
-    try {
-      let txurl = new URL(`http://${peer}/tx/${txid}/status`);
-      // console.log('sending txid check for ', txurl.href);
-      const response = await axios.get(txurl.href, this.headers);
-      // console.log('payload returned from ' + peerUrl, payload)
-      // console.log(response.status)
-      if (response.status == 200 && response.data !== 'Not Found.') {
-        // console.log(`Exist tx ${response.data.id} on ${peer}`);
-        return true;
-      }
-    } catch (err) {
-      // console.log("can't fetch " + this.location + ' ' + err);
-      return false;
+  try {
+    let txurl = new URL(`http://${peer}/tx/${txid}/status`);
+    // console.log('sending txid check for ', txurl.href);
+    const response = await axios.get(txurl.href, this.headers);
+    // console.log('payload returned from ' + peerUrl, payload)
+    // console.log(response.status)
+    if (response.status == 200 && response.data !== 'Not Found.') {
+      // console.log(`Exist tx ${response.data.id} on ${peer}`);
+      return true;
     }
-  };
+  } catch (err) {
+    // console.log("can't fetch " + this.location + ' ' + err);
+    return false;
+  }
+}
 module.exports = async (submission_value, round) => {
   console.log('******/ Areawve Scrapping VALIDATION Task FUNCTION /******');
   try {
@@ -30,28 +30,28 @@ module.exports = async (submission_value, round) => {
 
     let successedVerifies = 0;
     let totalVerifies = 0;
-    for (let key in parsedJSON){
-      if (key != "totalNodes" && parsedJSON[key] != 'Not Found'){
-        for (let value of parsedJSON[key]){
-            const result = await checkTx(value, key);
-            if (result){
-              successedVerifies += 1;
-              totalVerifies += 1;
-            }else{
-              totalVerifies += 1;
-            }
-
+    for (let key in parsedJSON) {
+      if (key != 'totalNodes' && parsedJSON[key] != 'Not Found') {
+        for (let value of parsedJSON[key]) {
+          const result = await checkTx(value, key);
+          if (result) {
+            successedVerifies += 1;
+            totalVerifies += 1;
+          } else {
+            totalVerifies += 1;
+          }
         }
       }
     }
-    
-    if (successedVerifies/totalVerifies>=0.8){
+
+    if (successedVerifies / totalVerifies >= 0.8) {
       return true;
-    }else{
-      console.log(`Successfully Verified ${successedVerifies} and the total is ${totalVerifies}`)
+    } else {
+      console.log(
+        `Successfully Verified ${successedVerifies} and the total is ${totalVerifies}`,
+      );
       return false;
     }
-
   } catch (err) {
     console.log('ERROR IN ARWEAVE VALIDATION FUNCTION', err);
     return true;

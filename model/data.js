@@ -1,4 +1,4 @@
-const { namespaceWrapper } = require('../namespaceWrapper');
+const { namespaceWrapper } = require('@_koii/namespace-wrapper');
 
 class Data {
   constructor(name, data) {
@@ -72,9 +72,9 @@ class Data {
       let existingData = await this.db.findOne({ pendingId });
       // console.log({ pendingId, pendingItem });
       if (!existingData) {
-      await this.db.insert({ pendingId, pendingItem });
-      // console.log('added pending item', id);
-      return true;
+        await this.db.insert({ pendingId, pendingItem });
+        // console.log('added pending item', id);
+        return true;
       } else {
         // console.log('pending item already exists or is verified');
         return true;

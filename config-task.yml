@@ -22,7 +22,7 @@ submission_window: 5000
 task_type: 'KPL'
 
 # OPTIONAL (ONLY IF Task Type = KPL) : Token Mint Address, Fire Token as an example here. 
-token_type: "FJG2aEPtertCXoedgteCCMmgngSZo1Zd715oNBzR7xpR"
+token_type: "4qayyw53kWz6GzypcejjT1cvwMXS1qYLSMQRE8se3gTv"
 
 # Amounts in KOII
 minimum_stake_amount: 1.9
@@ -53,7 +53,7 @@ requirementsTags:
 # OPTIONAL variables variables for creating task / REQUIRED variables for update task
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'D3k6TFk7PEk8YgHCptziVfYqLXcnP7HR2y2U7T2uiWMG'
+task_id: ''
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Submission Window Logic Improved'
+migrationDescription: ''

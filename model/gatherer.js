@@ -18,6 +18,8 @@ const storageClient = new KoiiStorageClient(undefined, undefined, false);
 const { Queue } = require('async-await-queue');
 const { namespaceWrapper } = require('../namespaceWrapper');
 const fs = require('fs');
+const DataValidator = require('../helpers/dataValidator');
+
 class Gatherer {
   constructor(db, adapter, options, round) {
     console.log('creating new adapter', db.name, adapter.txId, options);
@@ -238,6 +240,16 @@ class Gatherer {
     let path = `healthyList.json`;
     let basePath = '';
     try {
+      // Validate data before proceeding
+      const validationResult = DataValidator.validatePreSubmission(data);
+      if (!validationResult.isValid) {
+        console.error('Data validation failed:', validationResult.errors);
+        throw new Error(`Data validation failed: ${validationResult.errors.join(', ')}`);
+      }
+
+      // Use the validated data with checksum
+      data = validationResult.data;
+
       basePath = await namespaceWrapper.getBasePath();
       fs.writeFileSync(`${basePath}/${path}`, JSON.stringify(data));
       let attempts = 0;
@@ -251,11 +263,15 @@ class Gatherer {
             const client = new KoiiStorageClient(undefined, undefined, false);
             const userStaking = await namespaceWrapper.getSubmitterAccount();
             console.log(`Uploading ${basePath}/${path}`);
-            const fileUploadResponse = await client.uploadFile(`${basePath}/${path}`,userStaking);
+            const fileUploadResponse = await client.uploadFile(`${basePath}/${path}`, userStaking);
             console.log(`Uploaded ${basePath}/${path}`);
-            try{
+            try {
               cid = fileUploadResponse.cid;
-            }catch(err){
+              // Validate CID format
+              if (!DataValidator.isValidCID(cid)) {
+                throw new Error('Invalid CID format received from storage');
+              }
+            } catch (err) {
               cid = null;
               console.log('error getting CID', err);
             }
@@ -275,15 +291,16 @@ class Gatherer {
               await new Promise(resolve => setTimeout(resolve, 10000)); // 10s delay
             } else {
               console.log('Max retries reached, exiting...');
+              throw err;
             }
           }
-          break;
         }
       } else {
-        console.log('NODE DO NOT HAVE ACCESS TO KOII STORAGE SDK');
+        throw new Error('NODE DO NOT HAVE ACCESS TO KOII STORAGE SDK');
       }
-    } catch (err) {
-      console.log(err);
+    } catch (error) {
+      console.error('Error in uploadIPFS:', error);
+      throw error;
     }
   };
 
